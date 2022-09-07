@@ -82,4 +82,4 @@ kubectl get nodes
 
 # Installing calico as network ad-on
 echo -e "${ORANGE}Installing calico as network ad-on....${NC}"
-kubectl apply -f https://docs.projectcalico.org/v3.24/manifests/calico.yaml
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/canal.yaml
