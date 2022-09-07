@@ -8,6 +8,7 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN}Set some prerequisites....${NC}"
 
+
 # Disable swap
 sudo swapoff -a
 sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
@@ -20,16 +21,12 @@ sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 
 # Configure Firewall
 sudo systemctl enable --now firewalld.service
-sudo firewall-cmd --permanent --add-port=6443/tcp
-sudo firewall-cmd --permanent --add-port=2379-2380/tcp
 sudo firewall-cmd --permanent --add-port=10250/tcp
-sudo firewall-cmd --permanent --add-port=10251/tcp
-sudo firewall-cmd --permanent --add-port=10252/tcp
+sudo firewall-cmd --permanent --add-port=30000-32767/tcp                                                  
 sudo firewall-cmd --reload
 sudo modprobe br_netfilter
 sudo sh -c "echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables"
 sudo sh -c "echo '1' > /proc/sys/net/ipv4/ip_forward"
-
 
 # Install Docker
 echo -e "${GREEN}Install Docker....${NC}"
@@ -53,27 +50,3 @@ exclude=kubelet kubeadm kubectl
 EOF
 sudo dnf install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 sudo systemctl enable --now kubelet
-
-
-# Install Kubernetes Cluster with Kubeadm
-echo -e "${GREEN}Install Kubernetes Cluster with Kubeadm....${NC}"
-cat <<EOF | sudo tee kubeadm-config.yaml
-kind: ClusterConfiguration
-apiVersion: kubeadm.k8s.io/v1beta3
-kubernetesVersion: v1.23.10
---
-kind: KubeletConfiguration
-apiVersion: kubelet.config.k8s.io/v1beta1
-cgroupDriver: cgroupfs
-EOF
-sudo kubeadm init --config kubeadm-config.yaml
-
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-kubectl get nodes
-
-
-# Installing calico as network ad-on
-echo -e "${GREEN}Installing calico as network ad-on....${NC}"
-kubectl apply -f https://docs.projectcalico.org/v3.24/manifests/calico.yaml
