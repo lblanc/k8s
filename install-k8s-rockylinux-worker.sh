@@ -6,7 +6,7 @@ GREEN='\033[0;32m'
 ORANGE='\033[0;33]'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}Set some prerequisites....${NC}"
+echo -e "${ORANGE}Set some prerequisites....${NC}"
 
 
 # Disable swap
@@ -29,7 +29,7 @@ sudo sh -c "echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables"
 sudo sh -c "echo '1' > /proc/sys/net/ipv4/ip_forward"
 
 # Install Docker
-echo -e "${GREEN}Install Docker....${NC}"
+echo -e "${ORANGE}Install Docker....${NC}"
 sudo dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
 sudo dnf install docker-ce -y
 sudo systemctl start docker
@@ -37,7 +37,7 @@ sudo systemctl enable docker
 
 
 # Install kubelet, Kubeadm and kubectl
-echo -e "${GREEN}Install kubelet, Kubeadm and kubectl....${NC}"
+echo -e "${ORANGE}Install kubelet, Kubeadm and kubectl....${NC}"
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes

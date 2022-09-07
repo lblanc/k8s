@@ -6,7 +6,7 @@ GREEN='\033[0;32m'
 ORANGE='\033[0;33]'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}Set some prerequisites....${NC}"
+echo -e "${ORANGE}Set some prerequisites....${NC}"
 
 # Disable swap
 sudo swapoff -a
@@ -32,7 +32,7 @@ sudo sh -c "echo '1' > /proc/sys/net/ipv4/ip_forward"
 
 
 # Install Docker
-echo -e "${GREEN}Install Docker....${NC}"
+echo -e "${ORANGE}Install Docker....${NC}"
 sudo dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
 sudo dnf install docker-ce -y
 sudo systemctl start docker
@@ -40,7 +40,7 @@ sudo systemctl enable docker
 
 
 # Install kubelet, Kubeadm and kubectl
-echo -e "${GREEN}Install kubelet, Kubeadm and kubectl....${NC}"
+echo -e "${ORANGE}Install kubelet, Kubeadm and kubectl....${NC}"
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
@@ -56,7 +56,7 @@ sudo systemctl enable --now kubelet
 
 
 # Install Kubernetes Cluster with Kubeadm
-echo -e "${GREEN}Install Kubernetes Cluster with Kubeadm....${NC}"
+echo -e "${ORANGE}Install Kubernetes Cluster with Kubeadm....${NC}"
 cat <<EOF | sudo tee kubeadm-config.yaml
 kind: ClusterConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
@@ -75,5 +75,5 @@ kubectl get nodes
 
 
 # Installing calico as network ad-on
-echo -e "${GREEN}Installing calico as network ad-on....${NC}"
+echo -e "${ORANGE}Installing calico as network ad-on....${NC}"
 kubectl apply -f https://docs.projectcalico.org/v3.24/manifests/calico.yaml
