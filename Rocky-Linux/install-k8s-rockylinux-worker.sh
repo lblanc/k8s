@@ -20,7 +20,7 @@ sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 
 
 # Configure Firewall
-sudo systemctl disable --now firewalld.service
+sudo systemctl enable --now firewalld.service
 sudo firewall-cmd --permanent --add-port=10250/tcp
 sudo firewall-cmd --permanent --add-port=30000-32767/tcp                                                  
 sudo firewall-cmd --reload
