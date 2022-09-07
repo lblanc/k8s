@@ -19,13 +19,13 @@ sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 
 
 # Configure Firewall
-sudo systemctl disable --now firewalld.service
-#sudo firewall-cmd --permanent --add-port=6443/tcp
-#sudo firewall-cmd --permanent --add-port=2379-2380/tcp
-#sudo firewall-cmd --permanent --add-port=10250/tcp
-#sudo firewall-cmd --permanent --add-port=10251/tcp
-#sudo firewall-cmd --permanent --add-port=10252/tcp
-#sudo firewall-cmd --reload
+sudo systemctl enable --now firewalld.service
+sudo firewall-cmd --permanent --add-port=6443/tcp
+sudo firewall-cmd --permanent --add-port=2379-2380/tcp
+sudo firewall-cmd --permanent --add-port=10250/tcp
+sudo firewall-cmd --permanent --add-port=10251/tcp
+sudo firewall-cmd --permanent --add-port=10252/tcp
+sudo firewall-cmd --reload
 sudo modprobe br_netfilter
 sudo sh -c "echo '1' > /proc/sys/net/bridge/bridge-nf-call-ip6tables"
 sudo sh -c "echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables"
@@ -67,10 +67,10 @@ cat <<EOF | sudo tee kubeadm-config.yaml
 kind: ClusterConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
 kubernetesVersion: "v1.23.10"
----
-kind: KubeletConfiguration
-apiVersion: kubelet.config.k8s.io/v1beta1
-cgroupDriver: cgroupfs
+#---
+#kind: KubeletConfiguration
+#apiVersion: kubelet.config.k8s.io/v1beta1
+#cgroupDriver: cgroupfs
 EOF
 sudo kubeadm init --config kubeadm-config.yaml
 
