@@ -1,8 +1,8 @@
-**For master node**
+** For master node **
 
 curl -sfL https://raw.githubusercontent.com/lblanc/k8s/main/install-k8s-rockylinux-master.sh | sh -
 
 
-**For worker nodes**
+** For worker nodes **
 
 curl -sfL https://raw.githubusercontent.com/lblanc/k8s/main/install-k8s-rockylinux-worker.sh | sh -
