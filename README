@@ -1,1 +1,1 @@
-curl -sfL https://github.com/lblanc/k8s/blob/dcd8e4bd8103693579cb69645bd57e4eda47e420/install-k8s-rockylinux.sh | sh -
+curl -sfL https://raw.githubusercontent.com/lblanc/k8s/main/install-k8s-rockylinux.sh | sh -
