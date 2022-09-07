@@ -25,6 +25,7 @@ sudo systemctl disable --now firewalld.service
 #sudo firewall-cmd --permanent --add-port=30000-32767/tcp                                                  
 #sudo firewall-cmd --reload
 sudo modprobe br_netfilter
+sudo sh -c "echo '1' > /proc/sys/net/bridge/bridge-nf-call-ip6tables"
 sudo sh -c "echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables"
 sudo sh -c "echo '1' > /proc/sys/net/ipv4/ip_forward"
 
