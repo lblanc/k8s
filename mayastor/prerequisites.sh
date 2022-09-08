@@ -4,6 +4,9 @@
 # Worker nodes list
 nodes="node2 node3 node4"
 
+# Worker nodes list who will host mayastor
+nodesmayastor="node2 node3 node4"
+
 # Define some colours for later
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -21,3 +24,10 @@ for node in ${nodes}; do
   ssh root@${node} echo vm.nr_hugepages = 1024 | sudo tee -a /etc/sysctl.conf      
  
 done
+
+for node in ${nodes}; do
+ 
+    kubectl label node ${node} openebs.io/engine=mayastor
+ 
+done
+
