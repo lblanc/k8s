@@ -10,7 +10,7 @@ GREEN='\033[0;32m'
 ORANGE='\033[0;33]'
 NC='\033[0m' # No Color
 
-echo -e "${ORANGE}Run this script on master node with rsa key exchange with worker nodes${NC}"
+#echo -e "${ORANGE}Run this script on master node with rsa key exchange with worker nodes${NC}"
 echo
 read -p "Are you sure? " -n 1 -r
 echo  
