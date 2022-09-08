@@ -33,8 +33,11 @@ done
 
 
 # Disable swap
-onnodes ("sudo swapoff -a")
-onnodes ("sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab")
+command="sudo swapoff -a"
+onnodes ($command)
+
+command="sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab"
+onnodes ($command)
 
 command="sudo tee /etc/modules-load.d/containerd.conf <<EOF
 overlay
