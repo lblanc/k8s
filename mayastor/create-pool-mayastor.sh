@@ -3,7 +3,7 @@
 # Worker nodes list who will host mayastor
 nodesmayastor="node2 node3 node4"
 
-rawdisk="malloc:///malloc0?size_mb=2048"
+
 
 for node in ${nodesmayastor}; do
  
@@ -15,7 +15,7 @@ metadata:
   namespace: mayastor
 spec:
   node: $node
-  disks: [$rawdisk]
+  disks: [malloc:///malloc0?size_mb=2048]
 EOF
  
 done 
