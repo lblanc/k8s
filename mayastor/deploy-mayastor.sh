@@ -52,13 +52,19 @@ kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deplo
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/etcd/statefulset.yaml 
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/etcd/svc.yaml
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/etcd/svc-headless.yaml
-sleep 20
+echo -e "${RED}Check if etcd running before continue....${NC}"
+echo "kubectl -n mayastor get pods --selector=app.kubernetes.io/name=etcd"
+pause
 
 # Deploy Mayastor Components
 echo
 echo -e "${ORANGE}Deploy Mayastor Components....${NC}"
+echo
+echo -e "${ORANGE}CSI Node Plugin....${NC}"
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/csi-daemonset.yaml
-sleep 20
+echo -e "${RED}Check if CSI Node Plugin running before continue....${NC}"
+echo "kubectl -n mayastor get daemonset mayastor-csi"
+pause
 
 # Control Plane
 echo
@@ -67,24 +73,36 @@ echo -e "${ORANGE}Control Plane....${NC}"
 echo
 echo -e "${ORANGE}Core Agents....${NC}"
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/core-agents-deployment.yaml
-sleep 20
+echo -e "${RED}Check if Core Agents running before continue....${NC}"
+echo "kubectl get pods -n mayastor --selector=app=core-agents"
+pause
 # REST
 echo
 echo -e "${ORANGE}REST....${NC}"
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/rest-deployment.yaml
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/rest-service.yaml
-sleep 20
+echo -e "${RED}Check if REST running before continue....${NC}"
+echo "kubectl get pods -n mayastor --selector=app=rest"
+pause
 # CSI Controller
 echo
 echo -e "${ORANGE}CSI Controller....${NC}"
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/csi-deployment.yaml
-sleep 20
+echo -e "${RED}Check if CSI Controller running before continue....${NC}"
+echo "kubectl get pods -n mayastor --selector=app=csi-controller"
+pause
 # MSP Operator
 echo
 echo -e "${ORANGE}MSP Operator....${NC}"
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plane/master/deploy/msp-deployment.yaml
-sleep 20
+echo -e "${RED}Check if MSP Operator running before continue....${NC}"
+echo "kubectl get pods -n mayastor --selector=app=msp-operator"
+pause
 # Data Plane
 echo
 echo -e  "${ORANGE}Data Plane....${NC}"
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/mayastor-daemonset.yaml
+echo -e "${RED}Check mayastor daemonset running before continue....${NC}"
+echo "kubectl -n mayastor get daemonset mayastor"
+echo 
+echo "kubectl mayastor get nodes"
