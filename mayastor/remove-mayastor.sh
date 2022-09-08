@@ -17,7 +17,10 @@ for node in ${nodes}; do
  
 done
 
-
+# Delete namespace
+echo
+echo -e "${ORANGE}Delete namespace....${NC}"
+kubectl delete namespace mayastor
 
 
 # RBAC Resources
@@ -81,9 +84,6 @@ echo -e  "${ORANGE}Data Plane....${NC}"
 kubectl delete -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/mayastor-daemonset.yaml
 
 
-# Delete namespace
-echo
-echo -e "${ORANGE}Delete namespace....${NC}"
-kubectl delete namespace mayastor
+
 
 
