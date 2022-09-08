@@ -10,9 +10,9 @@ curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/mai
 # sh deploy-mayastor.sh
 
 
-** Configure Mayastor **
+** Create Mayastor pools **
 
-curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/configure-mayastor.sh | sh -
+curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/create-pool-mayastor.sh | sh -
 
 
 ** Remove Mayastor **
