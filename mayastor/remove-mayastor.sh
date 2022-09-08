@@ -13,7 +13,7 @@ nodesmayastor="node2 node3 node4"
 
 for node in ${nodes}; do
  
-    kubectl label node ${node} openebs.io/engine-
+    kubectl label node ${nodesmayastor} openebs.io/engine-
  
 done
 
