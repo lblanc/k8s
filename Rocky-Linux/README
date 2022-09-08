@@ -6,3 +6,7 @@ curl -sfL https://raw.githubusercontent.com/lblanc/k8s/main/Rocky-Linux/install-
 ** For worker nodes **
 
 curl -sfL https://raw.githubusercontent.com/lblanc/k8s/main/Rocky-Linux/install-k8s-rockylinux-worker.sh | sh -
+
+** For join worker nodes **
+
+curl -sfL https://raw.githubusercontent.com/lblanc/k8s/main/Rocky-Linux/join-worker-nodes.sh | sh -
