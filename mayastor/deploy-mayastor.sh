@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Worker nodes list who will host mayastor
+nodesmayastor="node2 node3 node4"
+
+for node in ${nodesmayastor}; do
+ 
+    kubectl label node ${node} openebs.io/engine=mayastor
+ 
+done 
 
 # Define some colours for later
 RED='\033[0;31m'
@@ -28,8 +36,11 @@ kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plan
 # Deploy Mayastor Dependencies
 echo
 echo -e "${ORANGE}Deploy Mayastor Dependencies....${NC}"
+# NATS
+echo
+echo -e "${ORANGE}NATS....${NC}"
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/nats-deployment.yaml
-sleep 20
+sleep 60
 
 
 # etcd

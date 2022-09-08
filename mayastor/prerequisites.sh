@@ -4,8 +4,6 @@
 # Worker nodes list
 nodes="node2 node3 node4"
 
-# Worker nodes list who will host mayastor
-nodesmayastor="node2 node3 node4"
 
 # Define some colours for later
 RED='\033[0;31m'
@@ -25,9 +23,5 @@ for node in ${nodes}; do
  
 done
 
-for node in ${nodes}; do
- 
-    kubectl label node ${node} openebs.io/engine=mayastor
- 
-done
+
 
