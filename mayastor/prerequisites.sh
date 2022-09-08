@@ -16,7 +16,6 @@ echo -e "${ORANGE}Enable Huge Page Support....${NC}"
 echo 1024 | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
 for node in ${nodes}; do
  
-  echo -e "${ORANGE}Join node: ${node} ${NC}"
   ssh root@${node} echo 1024 | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages      
  
 done
