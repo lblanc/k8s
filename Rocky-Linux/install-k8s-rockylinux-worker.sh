@@ -8,7 +8,7 @@ NC='\033[0m' # No Color
 
 
 # K8s version
-k8sversion=1.23.10-0
+k8sversion=1.24.4-0
 
 echo -e "${ORANGE}Set some prerequisites....${NC}"
 
