@@ -55,5 +55,5 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 #exclude=kubelet kubeadm kubectl
 EOF
-sudo dnf install -y kubelet-1.23.10-0 kubeadm-1.23.10-0 kubectl-1.23.10-0 --disableexcludes=kubernetes
+sudo dnf install -y wget kubelet-1.23.10-0 kubeadm-1.23.10-0 kubectl-1.23.10-0 --disableexcludes=kubernetes
 sudo systemctl enable --now kubelet
