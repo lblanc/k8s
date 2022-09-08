@@ -22,6 +22,3 @@ for node in ${nodes}; do
   ssh root@${node} echo vm.nr_hugepages = 1024 | sudo tee -a /etc/sysctl.conf      
  
 done
-
-
-
