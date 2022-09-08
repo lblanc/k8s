@@ -1,6 +1,6 @@
 
 ** Prerequisite **
 
-curl -sfL https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/prerequisites.sh | sh -
+curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/prerequisites.sh | sh -
 
 
