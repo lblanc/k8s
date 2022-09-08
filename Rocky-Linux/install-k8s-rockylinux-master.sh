@@ -6,6 +6,10 @@ GREEN='\033[0;32m'
 ORANGE='\033[0;33]'
 NC='\033[0m' # No Color
 
+
+# K8s version
+k8sversion=1.23.10-0
+
 echo -e "${ORANGE}Set some prerequisites....${NC}"
 
 # Disable swap
@@ -57,7 +61,7 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 #exclude=kubelet kubeadm kubectl
 EOF
-sudo dnf install -y wget tar kubelet-1.23.10-0 kubeadm-1.23.10-0 kubectl-1.23.10-0 --disableexcludes=kubernetes
+sudo dnf install -y wget tar kubelet-$k8sversion kubeadm-$k8sversion kubectl-$k8sversion --disableexcludes=kubernetes
 sudo systemctl enable --now kubelet
 
 
