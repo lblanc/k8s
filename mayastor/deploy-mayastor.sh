@@ -105,4 +105,4 @@ kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deplo
 echo -e "${RED}Check mayastor daemonset running before continue....${NC}"
 echo "kubectl -n mayastor get daemonset mayastor"
 echo 
-echo "kubectl mayastor get nodes"
+echo "kubectl -n mayastor get nodes"
