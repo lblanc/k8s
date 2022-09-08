@@ -1,16 +1,17 @@
 #!/bin/bash
 
 # Define some colours for later
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-ORANGE='\033[0;33]'
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+BLUE='\033[1;34m'
+ORANGE='\033[1;33]'
 NC='\033[0m' # No Color
 
 
 # K8s version
 k8sversion=1.24.4
 
-echo -e "${ORANGE}Set some prerequisites....${NC}"
+echo -e "${BLUE}Set some prerequisites....${NC}"
 
 
 # Disable swap
@@ -35,12 +36,12 @@ sudo sh -c "echo '1' > /proc/sys/net/ipv4/ip_forward"
 
 
 # Update
-echo -e "${ORANGE}System update....${NC}"
+echo -e "${BLUE}System update....${NC}"
 sudo dnf update -y
 
 
 # Install Docker
-echo -e "${ORANGE}Install Docker....${NC}"
+echo -e "${BLUE}Install Docker....${NC}"
 sudo dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
 sudo dnf install docker-ce -y
 sudo systemctl start docker
@@ -48,7 +49,7 @@ sudo systemctl enable docker
 
 
 # Install kubelet, Kubeadm and kubectl
-echo -e "${ORANGE}Install kubelet, Kubeadm and kubectl....${NC}"
+echo -e "${BLUE}Install kubelet, Kubeadm and kubectl....${NC}"
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
