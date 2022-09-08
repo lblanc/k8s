@@ -36,7 +36,8 @@ done
 onnodes ("sudo swapoff -a")
 onnodes ("sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab")
 
-onnodes ("sudo tee /etc/modules-load.d/containerd.conf <<EOF
+command="sudo tee /etc/modules-load.d/containerd.conf <<EOF
 overlay
 br_netfilter
-EOF")
+EOF"
+onnodes ($command)
