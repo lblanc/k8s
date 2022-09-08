@@ -73,5 +73,5 @@ kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plan
 sleep 20
 # Data Plane
 echo
- "${ORANGE}Data Plane....${NC}"
+echo -e  "${ORANGE}Data Plane....${NC}"
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/mayastor-daemonset.yaml
