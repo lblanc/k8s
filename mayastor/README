@@ -10,7 +10,9 @@ curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/mai
 # sh deploy-mayastor.sh
 
 
+** Configure Mayastor **
 
+curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/configure-mayastor.sh | sh -
 
 
 ** Remove Mayastor **
