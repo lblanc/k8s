@@ -7,8 +7,9 @@ ORANGE='\033[0;33]'
 NC='\033[0m' # No Color
 
 
-# K8s version
-k8sversion=1.24.4-0
+# K8s version & version
+k8sversion=1.24.4
+clustername="Lab-Cluster"
 
 echo -e "${ORANGE}Set some prerequisites....${NC}"
 
@@ -61,7 +62,7 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 #exclude=kubelet kubeadm kubectl
 EOF
-sudo dnf install -y wget tar kubelet-$k8sversion kubeadm-$k8sversion kubectl-$k8sversion --disableexcludes=kubernetes
+sudo dnf install -y wget tar kubelet-${k8sversion}-0 kubeadm-${k8sversion}-0 kubectl-${k8sversion}-0 --disableexcludes=kubernetes
 sudo systemctl enable --now kubelet
 
 
@@ -70,7 +71,8 @@ echo -e "${ORANGE}Install Kubernetes Cluster with Kubeadm....${NC}"
 cat <<EOF | sudo tee kubeadm-config.yaml
 kind: ClusterConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
-kubernetesVersion: "v1.23.10"
+kubernetesVersion: "${k8sversion}"
+clusterName: "${clustername}"
 networking:
   podSubnet: "10.244.0.0/16" # --pod-network-cidr
 #---
