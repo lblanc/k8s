@@ -15,6 +15,11 @@ curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/mai
 curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/create-pool-mayastor.sh | sh -
 
 
+** Delete Mayastor pools **
+
+curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/delete-pool-mayastor.sh | sh -
+
+
 ** Remove Mayastor **
 
 curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/remove-mayastor.sh | sh -
