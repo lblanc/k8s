@@ -1,0 +1,6 @@
+
+** Prerequisite **
+
+curl -sfL https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/prerequisites.sh | sh -
+
+
