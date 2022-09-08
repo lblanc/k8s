@@ -91,3 +91,5 @@ echo -e "${ORANGE}Installing calico as network ad-on....${NC}"
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/canal.yaml
 
 tar -xvz  -f <(wget -q -O - https://github.com/derailed/k9s/releases/download/v0.26.3/k9s_Linux_x86_64.tar.gz ) k9s
+
+reboot

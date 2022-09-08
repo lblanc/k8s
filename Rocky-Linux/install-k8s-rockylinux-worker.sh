@@ -61,3 +61,5 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cl
 EOF
 sudo dnf install -y wget tar kubelet-$k8sversion kubeadm-$k8sversion kubectl-$k8sversion --disableexcludes=kubernetes
 sudo systemctl enable --now kubelet
+
+reboot
