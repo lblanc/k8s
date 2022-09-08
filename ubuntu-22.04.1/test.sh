@@ -26,21 +26,20 @@ user="user"
 # Functions
 onnodes () {
 for node in ${nodes}; do
-  ssh ${user}@{node} $1       
+  ssh ${user}@${node} $command       
 done
-  
 }
 
 
 # Disable swap
 command="sudo swapoff -a"
-onnodes ($command)
+onnodes ()
 
 command="sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab"
-onnodes ($command)
+onnodes ()
 
 command="sudo tee /etc/modules-load.d/containerd.conf <<EOF
 overlay
 br_netfilter
 EOF"
-onnodes ($command)
+onnodes ()
