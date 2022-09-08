@@ -40,7 +40,9 @@ echo -e "${ORANGE}Deploy Mayastor Dependencies....${NC}"
 echo
 echo -e "${ORANGE}NATS....${NC}"
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/nats-deployment.yaml
-sleep 60
+echo -e "${RED}Check if NATS running before continue....${NC}"
+echo "kubectl -n mayastor get pods --selector=app=nats"
+pause
 
 
 # etcd
