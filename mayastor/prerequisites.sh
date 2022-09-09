@@ -19,13 +19,18 @@ user="user"
 
 #Enable Huge Page Support
 for node in ${nodes}; do
+  echo
   echo "${YELLOW}Enable Huge Page Support on node: ${node}${NC}"
   ssh ${user}@${node} "echo 1024 | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages"
-  ssh ${user}@${node} "echo vm.nr_hugepages = 1024 | sudo tee -a /etc/sysctl.conf"  
+  ssh ${user}@${node} "echo vm.nr_hugepages = 1024 | sudo tee -a /etc/sysctl.conf"
+  echo
+  echo "${YELLOW}Load nvme-tcp, ext4 and xfs modules : ${node}${NC}"  
   ssh ${user}@${node} "echo nvme-tcp | sudo tee -a /etc/modules"
   ssh ${user}@${node} "echo ext4 | sudo tee -a /etc/modules"
   ssh ${user}@${node} "echo xfs | sudo tee -a /etc/modules"
-  ssh ${user}@${node} "tar -xvz  -f <(wget -q -O - https://github.com/derailed/k9s/releases/download/v0.26.3/k9s_Linux_x86_64.tar.gz ) kubectl-mayastor"
+  echo
+  echo "${YELLOW}Install Mayastor kubectl plugin on node: ${node}${NC}"
+  ssh ${user}@${node} "tar -xvz  -f <(wget -q -O - https://github.com/openebs/mayastor-control-plane/releases/download/v1.0.2/kubectl-mayastor.tar.gz)"
   ssh ${user}@${node} "sudo mv ./kubectl-mayastor /bin/"
 done
 
