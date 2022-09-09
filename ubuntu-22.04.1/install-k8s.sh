@@ -6,10 +6,10 @@
 #
 
 # Define some colours for later
-RED='\033[1;31m'
-GREEN='\033[1;32m'
-BLUE='\033[1;34m'
-ORANGE='\033[1;33]'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Mastes + Workers nodes list
@@ -23,58 +23,49 @@ clustername="Lab-Cluster"
 user="user"
 
 
-# Functions
-onnodes () {
 for node in ${nodes}; do
-  ssh ${user}@{node} $1       
-done
-  
-}
-
 
 # Disable swap
-onnodes ("sudo swapoff -a")
-onnodes ("sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab")
+echo -e "${YELLOW}Disable swap on node: $node${NC}"
+ssh ${user}@${node} "sudo swapoff -a"
+ssh ${user}@${node} "sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab"
 
-onnodes ("sudo tee /etc/modules-load.d/containerd.conf <<EOF
+# Kernel modules
+echo -e "${YELLOW}Load Kernel modules on node: $node${NC}"
+ssh ${user}@${node} "sudo tee /etc/modules-load.d/containerd.conf <<EOF
 overlay
 br_netfilter
-EOF")
-
-$ sudo modprobe overlay
-$ sudo modprobe br_netfilter
-
-
-
-
-
-
+EOF"
+ssh ${user}@${node} "modprobe overlay"
+ssh ${user}@${node} "modprobe br_netfilter"
 
 # Update
-echo -e "${BLUE}System update....${NC}"
-sudo dnf update -y
+echo -e "${YELLOW}System update on node: $node${NC}"
+sudo apt update -y
+sudo apt upgrade -y
+
+# Enable Forwarding
+echo -e "${YELLOW}Enable Forwarding on node: $node${NC}"
+ssh ${user}@${node} "sudo tee /etc/sysctl.d/kubernetes.conf <<EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EOF "
+ssh ${user}@${node} "sudo sysctl --system"
 
 
-# Install Docker
-echo -e "${BLUE}Install Docker....${NC}"
-sudo dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
-sudo dnf install docker-ce -y
-sudo systemctl start docker
-sudo systemctl enable docker
 
 
-# Install kubelet, Kubeadm and kubectl
-echo -e "${BLUE}Install kubelet, Kubeadm and kubectl....${NC}"
-cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-name=Kubernetes
-baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-#exclude=kubelet kubeadm kubectl
-EOF
+
+
+
+
+
+done
+
+
+
+
 sudo dnf install -y wget tar kubelet-${k8sversion}-0 kubeadm-${k8sversion}-0 kubectl-${k8sversion}-0 --disableexcludes=kubernetes
 sudo systemctl enable --now kubelet
 
@@ -93,6 +84,7 @@ kind: KubeletConfiguration
 apiVersion: kubelet.config.k8s.io/v1beta1
 cgroupDriver: cgroupfs
 EOF
+
 sudo kubeadm init --config kubeadm-config.yaml
 
 mkdir -p $HOME/.kube
