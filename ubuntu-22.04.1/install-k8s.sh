@@ -1,10 +1,6 @@
 #!/bin/bash
 
 
-#
-# Run this script on master, with good hosts file and ssh key exchange with workers nodes "ssh-copy-id"
-#
-
 # Define some colours for later
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -18,11 +14,19 @@ masternode="node1"
 workernodes="node2 node3 node4"
 
 # K8s version & version
-k8sversion=1.24.4
-clustername="Lab-Cluster"
+k8sversion=1.23.10
+clustername="lab-cluster"
 
 # Linux user
 user="user"
+
+# Exchange rsa key with nodes
+echo -e "${YELLOW}DExchange rsa key with nodes{NC}"
+ssh-keygen -q  -f ~/.ssh/id_rsa  -N ""
+
+for node in ${nodes}; do
+ssh-copy-id ${user}@${node}
+done
 
 
 for node in ${nodes}; do
@@ -93,12 +97,11 @@ sleep 30
 
 
 # Join worker nodes
-ssh ${user}@${masternode} "sudo kubeadm init --control-plane-endpoint=${masternode}" 
 command=$(ssh ${user}@${masternode} "kubeadm token create --print-join-command")
 
 for node in ${workernodes}; do
   echo -e "${YELLOW}Join worker node: $node${NC}"
-  ssh ${user}@${node} ${command}        
+  ssh ${user}@${node} "sudo ${command}"        
 done
 
 sleep 30
