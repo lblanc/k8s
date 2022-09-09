@@ -20,7 +20,7 @@ k8sversion=1.23.10
 user="user"
 
 # Exchange rsa key with nodes
-echo "${YELLOW}Exchange rsa key with nodes{NC}"
+echo "${YELLOW}Exchange rsa key with nodes${NC}"
 ssh-keygen -q  -f ~/.ssh/id_rsa  -N ""
 
 for node in ${nodes}; do
