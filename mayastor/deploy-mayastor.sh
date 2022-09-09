@@ -94,3 +94,6 @@ echo "${RED}Check mayastor daemonset running before continue....${NC}"
 echo "kubectl -n mayastor get daemonset mayastor"
 echo 
 echo "kubectl -n mayastor get nodes"
+echo 
+echo "Use this link to configure Mayastor"
+echo "   https://mayastor.gitbook.io/introduction/quickstart/configure-mayastor"
