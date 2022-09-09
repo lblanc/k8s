@@ -14,6 +14,8 @@ NC='\033[0m' # No Color
 
 # Mastes + Workers nodes list
 nodes="node1 node2 node3 node4"
+masternode="node1"
+workernodes="node2 node3 node4"
 
 # K8s version & version
 k8sversion=1.24.4
@@ -69,8 +71,39 @@ ssh ${user}@${node} "sudo systemctl enable containerd"
 # Add apt repository for Kubernetes
 echo -e "${YELLOW}Add apt repository for Kubernetes on node: $node${NC}"
 ssh ${user}@${node} "curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -"
-ssh ${user}@${node} "sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main""
+ssh ${user}@${node} "sudo apt-add-repository 'deb http://apt.kubernetes.io/ kubernetes-xenial main'"
 
+# Install Kubernetes components Kubectl, kubeadm & kubelet
+echo -e "${YELLOW}Install Kubernetes components Kubectl, kubeadm & kubelet on node: $node${NC}"
+ssh ${user}@${node} "sudo apt install -y wget tar kubelet-${k8sversion}-00 kubeadm-${k8sversion}-00 kubectl-${k8sversion}-00"
+ssh ${user}@${node} "sudo apt-mark hold kubelet-${k8sversion}-00 kubeadm-${k8sversion}-00 kubectl-${k8sversion}-00"
 
 
 done
+
+
+# Initialize Kubernetes cluster with Kubeadm
+echo -e "${YELLOW}Initialize Kubernetes cluster with Kubeadm on master node: $node${NC}"
+ssh ${user}@${masternode} "sudo kubeadm init --control-plane-endpoint=${masternode}"
+ssh ${user}@${masternode} "mkdir -p $HOME/.kube"
+ssh ${user}@${masternode} "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
+ssh ${user}@${masternode} "sudo chown $(id -u):$(id -g) $HOME/.kube/config"
+tar -xvz  -f <(wget -q -O - https://github.com/derailed/k9s/releases/download/v0.26.3/k9s_Linux_x86_64.tar.gz ) k9s
+sleep 30
+
+
+
+# Join worker nodes
+ssh ${user}@${masternode} "sudo kubeadm init --control-plane-endpoint=${masternode}" 
+command=$(ssh ${user}@${masternode} "kubeadm token create --print-join-command")
+
+for node in ${workernodes}; do
+  echo -e "${YELLOW}Join worker node: $node${NC}"
+  ssh ${user}@${node} ${command}        
+done
+
+sleep 30
+
+# Install Calico Pod Network Add-on
+echo -e "${YELLOW}Install Calico Pod Network Add-on...{NC}"
+ssh ${user}@${masternode} "kubectl apply -f https://projectcalico.docs.tigera.io/manifests/calico.yaml"
