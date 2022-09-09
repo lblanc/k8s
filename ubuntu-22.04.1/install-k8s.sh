@@ -75,9 +75,9 @@ ssh ${user}@${node} "sudo apt-add-repository 'deb http://apt.kubernetes.io/ kube
 
 # Install Kubernetes components Kubectl, kubeadm & kubelet
 echo -e "${YELLOW}Install Kubernetes components Kubectl, kubeadm & kubelet on node: $node${NC}"
-ssh ${user}@${node} "sudo apt install -y wget tar kubelet-${k8sversion}-00 kubeadm-${k8sversion}-00 kubectl-${k8sversion}-00"
+ssh ${user}@${node} "sudo apt install -y wget tar kubelet=${k8sversion}-00 kubeadm=${k8sversion}-00 kubectl=${k8sversion}-00"
 ssh ${user}@${node} "sudo apt-mark hold kubelet-${k8sversion}-00 kubeadm-${k8sversion}-00 kubectl-${k8sversion}-00"
-
+ssh ${user}@${node} "tar -xvz  -f <(wget -q -O - https://github.com/derailed/k9s/releases/download/v0.26.3/k9s_Linux_x86_64.tar.gz ) k9s"
 
 done
 
@@ -88,7 +88,6 @@ ssh ${user}@${masternode} "sudo kubeadm init --control-plane-endpoint=${masterno
 ssh ${user}@${masternode} "mkdir -p $HOME/.kube"
 ssh ${user}@${masternode} "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
 ssh ${user}@${masternode} "sudo chown $(id -u):$(id -g) $HOME/.kube/config"
-tar -xvz  -f <(wget -q -O - https://github.com/derailed/k9s/releases/download/v0.26.3/k9s_Linux_x86_64.tar.gz ) k9s
 sleep 30
 
 

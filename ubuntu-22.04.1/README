@@ -1,12 +1,4 @@
-** For master node **
+** Install master & workers **
 
-curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/ubuntu-22.04.1/install-k8s-master.sh | sh -
+curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/ubuntu-22.04.1/install-k8s.sh | sh -
 
-
-** For worker nodes **
-
-curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/ubuntu-22.04.1/install-k8s-worker.sh | sh -
-
-** For join worker nodes **
-
-curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/ubuntu-22.04.1/join-worker-nodes.sh | sh -
