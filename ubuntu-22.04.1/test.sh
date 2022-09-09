@@ -38,10 +38,9 @@ onnodes ()
 command="sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab"
 onnodes ()
 
-command="cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
-overlay
-br_netfilter
-EOF"
+command="echo 'overlay'| sudo tee -a . /etc/modules-load.d/containerd.conf"
+onnodes ()
+command="echo 'br_netfilter' | sudo tee -a . /etc/modules-load.d/containerd.conf"
 onnodes ()
 
 
