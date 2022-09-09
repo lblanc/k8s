@@ -87,8 +87,9 @@ kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor-control-plan
 
 # Data Plane
 echo
-echo -e  "${YELLOW}Data Plane....${NC}"
+echo "${YELLOW}Data Plane....${NC}"
 kubectl apply -f https://raw.githubusercontent.com/openebs/mayastor/master/deploy/mayastor-daemonset.yaml
+echo
 echo "${RED}Check mayastor daemonset running before continue....${NC}"
 echo "kubectl -n mayastor get daemonset mayastor"
 echo 
