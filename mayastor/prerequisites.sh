@@ -1,27 +1,34 @@
 #!/bin/bash
 # Run on master node, rsa key must be exchange with worker nodes
 
-# Worker nodes list
-nodes="node2 node3 node4"
-
-
 # Define some colours for later
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-ORANGE='\033[0;33]'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Mastes + Workers nodes list
+nodes="node1 node2 node3 node4"
+masternode="node1"
+workernodes="node2 node3 node4"
+
+# Linux user
+user="user"
 
 
 #Enable Huge Page Support
-echo -e "${ORANGE}Enable Huge Page Support....${NC}"
-echo 1024 | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
-echo vm.nr_hugepages = 1024 | sudo tee -a /etc/sysctl.conf
 for node in ${nodes}; do
- 
-  ssh root@${node} echo 1024 | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
-  ssh root@${node} echo vm.nr_hugepages = 1024 | sudo tee -a /etc/sysctl.conf   
-  ssh root@${node} reboot   
- 
+  echo "${YELLOW}Enable Huge Page Support on node: ${node}${NC}"
+  ssh ${user}@${node} "echo 1024 | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages"
+  ssh ${user}@${node} "echo vm.nr_hugepages = 1024 | sudo tee -a /etc/sysctl.conf"
+  ssh ${user}@${node} "reboot"   
 done
 
-reboot
+for node in ${workernodes}; do
+  ssh ${user}@${node} "reboot"   
+done
+
+for node in ${masternode}; do
+  ssh ${user}@${node} "reboot"   
+done
