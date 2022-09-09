@@ -25,6 +25,8 @@ for node in ${nodes}; do
   ssh ${user}@${node} "echo nvme-tcp | sudo tee -a /etc/modules"
   ssh ${user}@${node} "echo ext4 | sudo tee -a /etc/modules"
   ssh ${user}@${node} "echo xfs | sudo tee -a /etc/modules"
+  ssh ${user}@${node} "tar -xvz  -f <(wget -q -O - https://github.com/derailed/k9s/releases/download/v0.26.3/k9s_Linux_x86_64.tar.gz ) kubectl-mayastor"
+  ssh ${user}@${node} "sudo mv ./kubectl-mayastor /bin/"
 done
 
 for node in ${workernodes}; do
