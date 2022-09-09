@@ -24,6 +24,7 @@ echo -e "${YELLOW}Exchange rsa key with nodes{NC}"
 ssh-keygen -q  -f ~/.ssh/id_rsa  -N ""
 
 for node in ${nodes}; do
+ssh ${user}@${node} "sudo hwclock --hctosys"
 ssh-copy-id ${user}@${node}
 done
 
@@ -86,7 +87,7 @@ done
 
 
 # Initialize Kubernetes cluster with Kubeadm
-echo -e "${YELLOW}Initialize Kubernetes cluster with Kubeadm on master node: $node${NC}"
+echo -e "${YELLOW}Initialize Kubernetes cluster with Kubeadm on master node: $masternode${NC}"
 ssh ${user}@${masternode} "sudo kubeadm init --control-plane-endpoint=${masternode}"
 ssh ${user}@${masternode} "mkdir -p $HOME/.kube"
 ssh ${user}@${masternode} "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
