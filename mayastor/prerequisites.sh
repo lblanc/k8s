@@ -21,8 +21,7 @@ user="user"
 for node in ${nodes}; do
   echo "${YELLOW}Enable Huge Page Support on node: ${node}${NC}"
   ssh ${user}@${node} "echo 1024 | sudo tee /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages"
-  ssh ${user}@${node} "echo vm.nr_hugepages = 1024 | sudo tee -a /etc/sysctl.conf"
-  ssh ${user}@${node} "reboot"   
+  ssh ${user}@${node} "echo vm.nr_hugepages = 1024 | sudo tee -a /etc/sysctl.conf"  
 done
 
 for node in ${workernodes}; do
