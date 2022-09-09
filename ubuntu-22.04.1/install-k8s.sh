@@ -79,9 +79,10 @@ ssh ${user}@${node} "sudo apt-add-repository 'deb http://apt.kubernetes.io/ kube
 
 # Install Kubernetes components Kubectl, kubeadm & kubelet
 echo "${YELLOW}Install Kubernetes components Kubectl, kubeadm & kubelet on node: $node${NC}"
-ssh ${user}@${node} "sudo apt install -y wget tar kubelet=${k8sversion}-00 kubeadm=${k8sversion}-00 kubectl=${k8sversion}-00"
+ssh ${user}@${node} "sudo apt install -y bash-completion wget tar kubelet=${k8sversion}-00 kubeadm=${k8sversion}-00 kubectl=${k8sversion}-00"
 ssh ${user}@${node} "sudo apt-mark hold kubelet=${k8sversion}-00 kubeadm=${k8sversion}-00 kubectl=${k8sversion}-00"
 ssh ${user}@${node} "tar -xvz  -f <(wget -q -O - https://github.com/derailed/k9s/releases/download/v0.26.3/k9s_Linux_x86_64.tar.gz ) k9s"
+ssh ${user}@${node} "kubectl completion bash | sudo tee /etc/bash_completion.d/kubectl > /dev/null"
 
 done
 
