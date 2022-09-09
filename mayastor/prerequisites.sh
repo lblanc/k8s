@@ -26,9 +26,9 @@ for node in ${nodes}; do
 done
 
 for node in ${workernodes}; do
-  ssh ${user}@${node} "reboot"   
+  ssh ${user}@${node} "sudo reboot"   
 done
 
 for node in ${masternode}; do
-  ssh ${user}@${node} "reboot"   
+  ssh ${user}@${node} "sudo reboot"   
 done
