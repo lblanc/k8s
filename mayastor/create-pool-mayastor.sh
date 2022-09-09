@@ -21,3 +21,9 @@ spec:
 EOF
  
 done 
+
+echo
+echo "${RED}Check mayastor daemonset running before continue....${NC}"
+echo "kubectl -n mayastor get msp"
+echo 
+kubectl -n mayastor get msp
