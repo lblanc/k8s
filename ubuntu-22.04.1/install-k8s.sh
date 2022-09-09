@@ -36,13 +36,13 @@ ssh ${user}@${node} "sudo tee /etc/modules-load.d/containerd.conf <<EOF
 overlay
 br_netfilter
 EOF"
-ssh ${user}@${node} "modprobe overlay"
-ssh ${user}@${node} "modprobe br_netfilter"
+ssh ${user}@${node} "sudo modprobe overlay"
+ssh ${user}@${node} "sudo modprobe br_netfilter"
 
 # Update
 echo -e "${YELLOW}System update on node: $node${NC}"
-sudo apt update -y
-sudo apt upgrade -y
+ssh ${user}@${node} "sudo apt update -y"
+ssh ${user}@${node} "sudo apt upgrade -y"
 
 # Enable Forwarding
 echo -e "${YELLOW}Enable Forwarding on node: $node${NC}"
@@ -54,49 +54,23 @@ EOF "
 ssh ${user}@${node} "sudo sysctl --system"
 
 
+# Install containerd runtime
+echo -e "${YELLOW}Install containerd runtime on node: $node${NC}"
+ssh ${user}@${node} "sudo apt install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates"
+ssh ${user}@${node} "sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/docker.gpg"
+ssh ${user}@${node} 'sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"'
+ssh ${user}@${node} "sudo apt update"
+ssh ${user}@${node} "sudo apt install -y containerd.io"
+ssh ${user}@${node} "containerd config default | sudo tee /etc/containerd/config.toml >/dev/null 2>&1"
+ssh ${user}@${node} "sudo sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml"
+ssh ${user}@${node} "sudo systemctl restart containerd"
+ssh ${user}@${node} "sudo systemctl enable containerd"
 
-
-
-
+# Add apt repository for Kubernetes
+echo -e "${YELLOW}Add apt repository for Kubernetes on node: $node${NC}"
+ssh ${user}@${node} "curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -"
+ssh ${user}@${node} "sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main""
 
 
 
 done
-
-
-
-
-sudo dnf install -y wget tar kubelet-${k8sversion}-0 kubeadm-${k8sversion}-0 kubectl-${k8sversion}-0 --disableexcludes=kubernetes
-sudo systemctl enable --now kubelet
-
-
-# Install Kubernetes Cluster with Kubeadm
-echo -e "${BLUE}Install Kubernetes Cluster with Kubeadm....${NC}"
-cat <<EOF | sudo tee kubeadm-config.yaml
-kind: ClusterConfiguration
-apiVersion: kubeadm.k8s.io/v1beta2
-kubernetesVersion: "${k8sversion}"
-#clusterName: "${clustername}"
-networking:
-  podSubnet: "10.244.0.0/16" # --pod-network-cidr
----
-kind: KubeletConfiguration
-apiVersion: kubelet.config.k8s.io/v1beta1
-cgroupDriver: cgroupfs
-EOF
-
-sudo kubeadm init --config kubeadm-config.yaml
-
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-kubectl get nodes
-
-
-# Installing calico as network ad-on
-echo -e "${BLUE}Installing calico as network ad-on....${NC}"
-kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/canal.yaml
-
-tar -xvz  -f <(wget -q -O - https://github.com/derailed/k9s/releases/download/v0.26.3/k9s_Linux_x86_64.tar.gz ) k9s
-
-reboot
