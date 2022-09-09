@@ -3,7 +3,7 @@
 # Worker nodes list who will host mayastor
 nodesmayastor="node2 node3 node4"
 
-#rawdisk="/dev/vdb"
+rawdisk="/dev/vdb"
 
 for node in ${nodesmayastor}; do
  
@@ -15,7 +15,7 @@ metadata:
   namespace: mayastor
 spec:
   node: $node
-  disks: ["/dev/vdb"]
+  disks: ["$rawdisk"]
 EOF
  
 done 

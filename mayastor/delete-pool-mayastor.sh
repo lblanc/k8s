@@ -15,7 +15,7 @@ metadata:
   namespace: mayastor
 spec:
   node: $node
-  disks: [$rawdisk]
+  disks: ["$rawdisk"]
 EOF
  
 done 
