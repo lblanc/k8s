@@ -14,14 +14,13 @@ masternode="node1"
 workernodes="node2 node3 node4"
 
 # K8s version & version
-k8sversion=1.23.10
-clustername="lab-cluster"
+k8sversion=1.24.4
 
 # Linux user
 user="user"
 
 # Exchange rsa key with nodes
-echo -e "${YELLOW}DExchange rsa key with nodes{NC}"
+echo -e "${YELLOW}Exchange rsa key with nodes{NC}"
 ssh-keygen -q  -f ~/.ssh/id_rsa  -N ""
 
 for node in ${nodes}; do
