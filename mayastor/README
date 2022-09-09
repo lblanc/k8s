@@ -6,8 +6,8 @@ curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/mai
 
 ** Deploy Mayastor **
 
-# wget https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/deploy-mayastor.sh
-# sh deploy-mayastor.sh
+curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/deploy-mayastor.sh | sh -
+
 
 
 ** Create Mayastor pools **
