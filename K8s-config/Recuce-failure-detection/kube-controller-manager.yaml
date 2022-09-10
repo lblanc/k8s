@@ -1,4 +1,5 @@
 #
+# /etc/kubernetes/manifests/kube-controller-manager.yaml
 # Edit and add follow lines
 # sudo systemctl restart docker
 # sudo systemctl restart kubelet
