@@ -1,0 +1,11 @@
+# /etc/kubernetes/manifests/kubeadm-apiserver-update.yaml
+# kubeadm init phase control-plane apiserver --config=/etc/kubernetes/manifests/kubeadm-apiserver-update.yaml
+# reduce failure de
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+kubernetesVersion: v1.23.10
+apiServer:
+ extraArgs:
+  enable-admission-plugins: DefaultTolerationSeconds
+  default-not-ready-toleration-seconds: "20"
+  default-unreachable-toleration-seconds: "20"
