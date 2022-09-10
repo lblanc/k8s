@@ -102,7 +102,10 @@ command=$(ssh ${user}@${masternode} "kubeadm token create --print-join-command")
 
 for node in ${workernodes}; do
   echo "${YELLOW}Join worker node: $node${NC}"
-  ssh ${user}@${node} "sudo ${command}"        
+  ssh ${user}@${node} "sudo ${command}"       
+  ssh ${user}@${node} "mkdir -p $HOME/.kube"
+  scp ${user}@${masternode}:$HOME/.kube/config ${user}@${node}:$HOME/.kube/config
+  ssh ${user}@${node} "sudo chown $(id -u):$(id -g) $HOME/.kube/config" 
 done
 
 sleep 30
