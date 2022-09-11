@@ -1,0 +1,7 @@
+# 
+# 
+# kubectl edit -n kube-system  configmaps kubelet-config-1.23
+#
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+nodeStatusUpdateFrequency: 1s
