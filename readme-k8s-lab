@@ -1,0 +1,27 @@
+##########################################################
+
+Welcome to this Lab
+
+Here some link to deploy K8s and Matastor
+
+** Install K8s master & workers **
+
+curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/ubuntu-22.04.1/install-k8s.sh | sh -
+
+
+** Mayastor prerequisite **
+
+curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/prerequisites.sh | sh -
+
+
+** Deploy Mayastor **
+
+curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/deploy-mayastor.sh | sh -
+
+
+
+** Create Mayastor pools **
+
+curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/mayastor/create-pool-mayastor.sh | sh -
+
+##########################################################
