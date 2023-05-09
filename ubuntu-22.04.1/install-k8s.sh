@@ -112,4 +112,6 @@ sleep 30
 
 # Install Calico Pod Network Add-on
 echo "${YELLOW}Install Calico Pod Network Add-on ${NC}"
-ssh ${user}@${masternode} "kubectl apply -f https://projectcalico.docs.tigera.io/manifests/calico.yaml"
+#ssh ${user}@${masternode} "kubectl apply -f https://projectcalico.docs.tigera.io/manifests/calico.yaml"
+ssh ${user}@${masternode} "kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/tigera-operator.yaml"
+ssh ${user}@${masternode} "kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/custom-resources.yaml"
