@@ -18,6 +18,7 @@ k8sversion=1.23.10
 
 # Linux user
 user="user"
+alias ssh="ssh  -o 'StrictHostKeyChecking no'"
 
 # Exchange rsa key with nodes
 echo "${YELLOW}Exchange rsa key with nodes${NC}"
