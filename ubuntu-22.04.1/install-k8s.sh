@@ -38,7 +38,7 @@ ssh ${user}@${node} "sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab"
 
 # Kernel modules
 echo "${YELLOW}Load Kernel modules on node: $node${NC}"
-ssh ${user}@${node} "sudo tee /etc/modules-load.d/containerd.conf <<EOF
+ssh ${user}@${node} "sudo tee /etc/modules-load.d/modules.conf <<EOF
 overlay
 br_netfilter
 EOF"
