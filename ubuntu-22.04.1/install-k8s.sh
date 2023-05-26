@@ -99,6 +99,7 @@ sleep 30
 
 
 # Join worker nodes
+echo "${YELLOW}Create kube join command${NC}"
 command=$(ssh ${user}@${masternode} "kubeadm token create --print-join-command")
 
 for node in ${workernodes}; do
