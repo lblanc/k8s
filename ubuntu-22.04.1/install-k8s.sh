@@ -14,7 +14,7 @@ masternode="node1"
 workernodes="node2 node3 node4"
 
 # K8s version & version
-k8sversion=1.23.10
+k8sversion=1.23.17
 
 # Linux user
 user="user"
