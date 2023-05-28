@@ -117,4 +117,3 @@ echo "${YELLOW}Install Flannel Pod Network Add-on ${NC}"
 ssh ${user}@${masternode} "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml"
 
 ./k9s
-
