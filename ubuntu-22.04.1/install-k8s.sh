@@ -90,8 +90,7 @@ done
 
 # Initialize Kubernetes cluster with Kubeadm
 echo "${YELLOW}Initialize Kubernetes cluster with Kubeadm on master node: $masternode${NC}"
-ssh ${user}@${masternode} "sudo kubeadm init --control-plane-endpoint=${masternode}"
-ssh ${user}@${masternode} "sudo kubeadm init --pod-network-cidr=172.20.0.0/16"
+ssh ${user}@${masternode} "sudo kubeadm init --pod-network-cidr=172.20.0.0/16 --control-plane-endpoint=${masternode}"
 ssh ${user}@${masternode} "mkdir -p $HOME/.kube"
 ssh ${user}@${masternode} "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
 ssh ${user}@${masternode} "sudo chown $(id -u):$(id -g) $HOME/.kube/config"
