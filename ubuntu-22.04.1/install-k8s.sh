@@ -91,6 +91,7 @@ done
 # Initialize Kubernetes cluster with Kubeadm
 echo "${YELLOW}Initialize Kubernetes cluster with Kubeadm on master node: $masternode${NC}"
 ssh ${user}@${masternode} "sudo kubeadm init --control-plane-endpoint=${masternode}"
+ssh ${user}@${masternode} "sudo kubeadm init --pod-network-cidr=172.20.0.0/16"
 ssh ${user}@${masternode} "mkdir -p $HOME/.kube"
 ssh ${user}@${masternode} "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
 ssh ${user}@${masternode} "sudo chown $(id -u):$(id -g) $HOME/.kube/config"
@@ -115,5 +116,8 @@ sleep 30
 # Install Calico Pod Network Add-on
 echo "${YELLOW}Install Calico Pod Network Add-on ${NC}"
 #ssh ${user}@${masternode} "kubectl apply -f https://projectcalico.docs.tigera.io/manifests/calico.yaml"
-ssh ${user}@${masternode} "kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/tigera-operator.yaml"
-ssh ${user}@${masternode} "kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/custom-resources.yaml"
+#ssh ${user}@${masternode} "kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/tigera-operator.yaml"
+#ssh ${user}@${masternode} "kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.1/manifests/custom-resources.yaml"
+
+ssh ${user}@${masternode} "kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.0/manifests/tigera-operator.yaml"
+ssh ${user}@${masternode} "kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.0/manifests/custom-resources.yaml"
