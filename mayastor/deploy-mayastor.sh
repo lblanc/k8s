@@ -31,10 +31,19 @@ helm repo add mayastor https://openebs.github.io/mayastor-extensions/
 
 
 
-# install Mayastor _version 2.2.
+# install Mayastor version 2.2.
 echo
-echo "${YELLOW}Install Mayastor _version 2.2....${NC}"
+echo "${YELLOW}Install Mayastor version 2.2....${NC}"
 helm install mayastor mayastor/mayastor -n mayastor --create-namespace --version 2.2.0
+
+
+# install Mayastor Plugin 2.2.
+echo
+echo "${YELLOW}Install Mayastor Plugin 2.2....${NC}"
+wget "https://github.com/openebs/mayastor-control-plane/releases/download/v2.2.0/kubectl-mayastor-x86_64-linux-musl"
+sudo mv kubectl-mayastor-x86_64-linux-musl /usr/local/bin/kubectl-mayastor
+chmod +x /usr/local/bin/kubectl-mayastor
+kubectl mayastor -V
 
 
 
