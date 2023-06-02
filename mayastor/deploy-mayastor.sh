@@ -19,7 +19,7 @@ NC='\033[0m' # No Color
 # Install helm
 echo
 echo "${YELLOW}install helm....${NC}"
-ssh ${user}@${node} "tar -xvz  -f <(wget -q -O - https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz) linux-amd64/helm
+ssh ${user}@${node} "tar -xvz  -f <(wget -q -O - https://get.helm.sh/helm-v3.12.0-linux-amd64.tar.gz) linux-amd64/helm"
 sudo mv linux-amd64/helm /usr/local/bin/helm
 sudo rm -fR linux-amd64
 
