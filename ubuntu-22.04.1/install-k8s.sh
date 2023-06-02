@@ -35,7 +35,7 @@ for node in ${nodes}; do
 # Disable swap
 echo "${YELLOW}Disable swap on node: $node${NC}"
 ssh ${user}@${node} "sudo swapoff -a"
-ssh ${user}@${node} "sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab"
+ssh ${user}@${node} "sudo sed -i '/swap.img/d' /etc/fstab"
 
 # Kernel modules
 echo "${YELLOW}Load Kernel modules on node: $node${NC}"
