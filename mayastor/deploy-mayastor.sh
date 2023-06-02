@@ -3,6 +3,7 @@
 # Worker nodes list who will host mayastor
 nodesmayastor="node2 node3 node4"
 
+
 for node in ${nodesmayastor}; do
  
     kubectl label node ${node} openebs.io/engine=mayastor
