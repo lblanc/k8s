@@ -27,20 +27,21 @@ sudo rm -fR ./linux-amd64
 sudo rm -fR helm-v3.12.0-linux-amd64.tar.gz
 
 
-# Add the OpenEBS Mayastor Helm repository.
+# Add the OpenEBS Helm repository.
 echo
-echo "${YELLOW}Add the OpenEBS Mayastor Helm repository....${NC}"
-helm repo add mayastor https://openebs.github.io/mayastor-extensions/ 
+echo "${YELLOW}Add the OpenEBS Helm repository....${NC}"
+helm repo add openebs https://openebs.github.io/charts
+helm repo update
 
 
 
-# install Mayastor version 2.2.
+# install OpenEBS version 
 echo
-echo "${YELLOW}Install Mayastor version 2.2....${NC}"
-helm install mayastor mayastor/mayastor -n mayastor --create-namespace --version 2.2.0
+echo "${YELLOW}Install OpenEBS mayastor ....${NC}"
+helm install openebs --namespace openebs openebs/openebs --set mayastor.enabled=true --create-namespace
 
 
-# install Mayastor Plugin 2.2.
+# install OpenEBS Plugin
 echo
 echo "${YELLOW}Install Mayastor Plugin 2.2....${NC}"
 wget "https://github.com/openebs/mayastor-control-plane/releases/download/v2.2.0/kubectl-mayastor-x86_64-linux-musl"
