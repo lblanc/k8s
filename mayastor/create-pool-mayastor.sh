@@ -25,6 +25,6 @@ done
 
 echo
 echo "${RED}Check mayastor daemonset running before continue....${NC}"
-echo "kubectl -n mayastor get msp"
+echo "kubectl get dsp -n mayastor"
 echo 
-kubectl -n mayastor get msp
+kubectl get dsp -n mayastor
