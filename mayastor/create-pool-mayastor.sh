@@ -14,8 +14,8 @@ rawdisk="/media/ramdisk"
 for node in ${nodesmayastor}; do
 
 
-ssh ${user}@${nodesmayastor} "sudo mkdir /media/ramdisk"
-ssh ${user}@${nodesmayastor} "sudo mount -t tmpfs -o size=2G tmpfs /media/ramdisk"
+ssh ${user}@${node} "sudo mkdir /media/ramdisk"
+ssh ${user}@${node} "sudo mount -t tmpfs -o size=2G tmpfs /media/ramdisk"
  
 cat <<EOF | kubectl create -f -
 apiVersion: "openebs.io/v1alpha1"
