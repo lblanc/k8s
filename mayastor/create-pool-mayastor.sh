@@ -13,7 +13,7 @@ cat <<EOF | kubectl create -f -
 apiVersion: "openebs.io/v1alpha1"
 kind: DiskPool
 metadata:
-  name: pool-$node
+  name: pool-on-$node
   namespace: mayastor
 spec:
   node: $node
