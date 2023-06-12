@@ -24,7 +24,7 @@ EOF
 done 
 
 echo
-echo "${RED}Check mayastor daemonset running before continue....${NC}"
+echo "${RED}Verify Pool Creation and Status before continue....${NC}"
 echo "kubectl get dsp -n mayastor"
 echo 
 kubectl get dsp -n mayastor
