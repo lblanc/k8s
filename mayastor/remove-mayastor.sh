@@ -7,8 +7,6 @@ GREEN='\033[0;32m'
 ORANGE='\033[0;33]'
 NC='\033[0m' # No Color
 
-# Worker nodes list who will host mayastor
-nodesmayastor="node2 node3 node4"
     
 
 for node in ${nodes}; do
