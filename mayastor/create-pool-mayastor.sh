@@ -1,21 +1,13 @@
 #!/bin/bash
 
-# Linux user
-user="user"
-alias ssh="ssh  -o 'StrictHostKeyChecking no'"
-
 # Worker nodes list who will host mayastor
 nodesmayastor="node2 node3 node4"
 
-#rawdisk="/dev/vdb"
-rawdisk="/media/ramdisk"
+rawdisk="/dev/vdb"
+#rawdisk="/media/ramdisk"
 
 
 for node in ${nodesmayastor}; do
-
-
-ssh ${user}@${node} "sudo mkdir /media/ramdisk"
-ssh ${user}@${node} "sudo mount -t tmpfs -o size=2G tmpfs /media/ramdisk"
  
 cat <<EOF | kubectl create -f -
 apiVersion: "openebs.io/v1alpha1"
