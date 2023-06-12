@@ -32,6 +32,14 @@ done
 
 for node in ${nodes}; do
 
+# Enable ufw and rules
+echo "${YELLOW}Enable ufw and rules on node: $node${NC}"
+ssh ${user}@${node} "sudo ufw allow ssh"
+ssh ${user}@${node} "sudo ufw --force enable"
+ssh ${user}@${node} "sudo ufw allow from 192.168.1.0/24"
+ssh ${user}@${node} "sudo ufw allow from 10.244.0.0/16"
+
+
 # Disable swap
 echo "${YELLOW}Disable swap on node: $node${NC}"
 ssh ${user}@${node} "sudo swapoff -a"
