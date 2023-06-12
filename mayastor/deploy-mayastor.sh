@@ -55,7 +55,7 @@ kubectl mayastor -V
 # End
 echo
 echo "${RED}Check mayastor daemonset running before continue....${NC}"
-echo "kubectl -n mayastor get daemonset mayastor"
+echo "kubectl -n mayastor get pods"
 echo 
 echo "kubectl -n mayastor get nodes"
 echo 
