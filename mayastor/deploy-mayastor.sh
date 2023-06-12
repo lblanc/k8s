@@ -29,16 +29,17 @@ sudo rm -fR helm-v3.12.0-linux-amd64.tar.gz
 
 # Add the OpenEBS Helm repository.
 echo
-echo "${YELLOW}Add the OpenEBS Helm repository....${NC}"
-helm repo add openebs https://openebs.github.io/charts
+echo "${YELLOW}Add the mayastor Helm repository....${NC}"
+helm repo add mayastor https://openebs.github.io/mayastor-extensions/
 helm repo update
 
 
 
 # install OpenEBS version 
 echo
-echo "${YELLOW}Install OpenEBS mayastor ....${NC}"
-helm install openebs --namespace openebs openebs/openebs --set mayastor.enabled=true --create-namespace
+echo "${YELLOW}Install  mayastor 2.2.0 ....${NC}"
+helm install mayastor mayastor/mayastor -n mayastor --create-namespace --version 2.2.0 --set etcd.persistence.storageClass="manual" --set loki-stack.loki.persistence.storageClassName="manual"
+
 
 
 # install OpenEBS Plugin
