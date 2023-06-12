@@ -9,7 +9,7 @@ for node in ${nodesmayastor}; do
  
 cat <<EOF | kubectl delete -f -
 apiVersion: "openebs.io/v1alpha1"
-kind: MayastorPool
+kind: DiskPool
 metadata:
   name: pool-on-$node
   namespace: mayastor
