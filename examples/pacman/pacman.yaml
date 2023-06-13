@@ -28,7 +28,7 @@ metadata:
   name: mongo
   namespace: pacman
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
     - port: 27017
       targetPort: 27017
@@ -78,7 +78,7 @@ metadata:
     name: pacman
   namespace: pacman
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
     - port: 80
       targetPort: 8080
