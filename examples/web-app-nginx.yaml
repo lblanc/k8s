@@ -5,19 +5,6 @@ metadata:
 
 ---
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: web-app-pv
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: mayastor-3
-
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: web-app-pvc
