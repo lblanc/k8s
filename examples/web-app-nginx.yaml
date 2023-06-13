@@ -34,8 +34,8 @@ spec:
         app: web-app
     spec:
       containers:
-        - name: web-app
-          image: lblanc/web-app
+        - name: nginx
+          image: nginx
           ports:
             - containerPort: 80
           volumeMounts:
