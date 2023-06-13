@@ -34,7 +34,7 @@ spec:
         app: web-app
     spec:
       containers:
-        - name: lblanc/web-app
+        - name: web-app
           image: lblanc/web-app
           ports:
             - containerPort: 80
