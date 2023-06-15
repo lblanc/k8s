@@ -26,6 +26,7 @@ metadata:
   namespace: web-app
 spec:
   replicas: 1
+  serviceName: web-app-service
   selector:
     matchLabels:
       app: web-app
