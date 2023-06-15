@@ -18,8 +18,9 @@ spec:
   storageClassName: mayastor-3
 
 ---
+
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: web-app-deployment
   namespace: web-app
@@ -59,5 +60,5 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
-      nodePort: 30080
-  type: NodePort
+  externalIPs:
+    - 192.168.1.11
