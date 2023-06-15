@@ -33,6 +33,8 @@ spec:
       labels:
         app: web-app
     spec:
+      nodeSelector:
+         NodeType: ALL
       containers:
         - name: nginx
           image: nginx
