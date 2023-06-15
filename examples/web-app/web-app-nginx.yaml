@@ -20,7 +20,7 @@ spec:
 ---
 
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: web-app-deployment
   namespace: web-app
