@@ -31,6 +31,12 @@ for node in ${nodes}; do
  echo
  echo "${YELLOW}Set iSCSI Initiator Name : ${node}${NC}"  
  ssh ${user}@${node} "echo 'InitiatorName=iqn.2004-10.com.ubuntu:${node}' > /etc/iscsi/initiatorname.iscsi"
+ echo
+ echo "${YELLOW}Enable iSCSI and installing tools : ${node}${NC}"  
+ ssh ${user}@${node} "sudo apt-get update"
+ ssh ${user}@${node} "sudo apt-get install open-iscsi"
+ ssh ${user}@${node} "sudo systemctl enable --now iscsid"
+
 
 done
 
