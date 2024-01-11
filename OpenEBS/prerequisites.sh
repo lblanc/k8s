@@ -28,6 +28,10 @@ for node in ${nodes}; do
  ssh ${user}@${node} "echo nvme-tcp | sudo tee -a /etc/modules"
  ssh ${user}@${node} "echo ext4 | sudo tee -a /etc/modules"
  ssh ${user}@${node} "echo xfs | sudo tee -a /etc/modules"
+ echo
+ echo "${YELLOW}Set iSCSI Initiator Name : ${node}${NC}"  
+ ssh ${user}@${node} "echo 'InitiatorName=iqn.2004-10.com.ubuntu:${node}' > /etc/iscsi/initiatorname.iscsi"
+
 done
 
 for node in ${workernodes}; do
