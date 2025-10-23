@@ -71,9 +71,9 @@ ssh ${user}@${node} "sudo mkdir -p /etc/apt/keyrings"
 ssh ${user}@${node} "curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg"
 
 ssh ${user}@${node} "echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  'deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
   https://download.docker.com/linux/debian \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null"
+  $(lsb_release -cs) stable' | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null"
 
 ssh ${user}@${node} "sudo apt update"
 ssh ${user}@${node} "sudo apt install -y containerd.io"
