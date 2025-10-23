@@ -94,8 +94,8 @@ ssh ${user}@${node} "sudo apt install -y apt-transport-https ca-certificates cur
 ssh ${user}@${node} "sudo mkdir -p /etc/apt/keyrings"
 ssh ${user}@${node} "curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg"
 
-ssh ${user}@${node} "echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] \
-https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list"
+ssh ${user}@${node} "echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] \
+https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list"
 
 
 # Install Kubernetes components Kubectl, kubeadm & kubelet
