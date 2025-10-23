@@ -42,6 +42,9 @@ echo "${YELLOW}Load Kernel modules on node: $node${NC}"
 ssh ${user}@${node} "cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 overlay
 br_netfilter
+nvme_tcp
+ext4
+xfs
 EOF"
 ssh ${user}@${node} "sudo modprobe overlay"
 ssh ${user}@${node} "sudo modprobe br_netfilter"
