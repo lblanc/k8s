@@ -109,14 +109,20 @@ echo -e "${GREEN}✅ Tous les nœuds sont configurés !${NC}"
 # Initialisation du master
 #==============================
 echo -e "${YELLOW}🚀 Initialisation du cluster Kubernetes sur ${masternode}${NC}"
+
 ssh "${user}@${masternode}" "
-  sudo kubeadm reset -f || true
-  sudo systemctl restart containerd
-  sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint=${masternode}
-  mkdir -p /root/.kube
-  sudo cp -i /etc/kubernetes/admin.conf /root/.kube/config
-  sudo chown root:root /root/.kube/config
-  wget -q -O - https://github.com/derailed/k9s/releases/download/v0.50.16/k9s_Linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin k9s
+  if sudo test -f /etc/kubernetes/admin.conf; then
+    echo '[INFO] ✅ Cluster déjà initialisé, on saute kubeadm init.'
+  else
+    sudo kubeadm reset -f || true
+    sudo systemctl restart containerd
+    sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint=${masternode}
+    mkdir -p /root/.kube
+    sudo cp /etc/kubernetes/admin.conf /root/.kube/config
+    sudo chown root:root /root/.kube/config
+    echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> /root/.bashrc
+    wget -q -O - https://github.com/derailed/k9s/releases/download/v0.50.16/k9s_Linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin k9s
+  fi
 "
 
 #==============================
@@ -140,9 +146,20 @@ wait
 echo -e "${GREEN}✅ Tous les workers ont rejoint le cluster !${NC}"
 
 #==============================
-# Installation Flannel
+# Installation du réseau Flannel
 #==============================
 echo -e "${YELLOW}🌐 Installation du réseau Flannel${NC}"
-ssh "${user}@${masternode}" "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml"
+ssh "${user}@${masternode}" "
+  if ! kubectl get pods -n kube-flannel >/dev/null 2>&1; then
+    kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+  else
+    echo '[INFO] Flannel déjà installé, on saute cette étape.'
+  fi
+"
 
-echo -e "${GREEN}✅ Cluster Kubernetes prêt ! Lance 'kubectl get nodes' ou 'k9s' pour administrer.${NC}"
+echo -e "${GREEN}✅ Cluster Kubernetes prêt !"
+echo -e "👉 Commandes utiles :
+  kubectl get nodes -o wide
+  kubectl get pods -A
+  k9s
+${NC}"
