@@ -126,10 +126,13 @@ EOF
 echo -e "${GREEN}✔️ Master initialisé.${NC}"
 
 #==============================
-# Ajout des workers (non bloquant)
+# Ajout des workers (corrigé + auto-token)
 #==============================
 echo -e "${YELLOW}🔗 Ajout des workers au cluster${NC}"
-join_cmd=$(ssh -o StrictHostKeyChecking=no "${user}@${masternode}" "kubeadm token create --print-join-command")
+
+# Regénère un token valide à chaque run
+join_cmd=$(ssh -o StrictHostKeyChecking=no "${user}@${masternode}" \
+  "kubeadm token create --print-join-command --ttl 1h 2>/dev/null")
 
 added=0
 failed=0
@@ -139,7 +142,7 @@ for node in "${workernodes[@]}"; do
   echo -e "${BLUE}→ Ajout de ${node}${NC}"
   (
     ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 -o ServerAliveInterval=10 "${user}@${node}" \
-      "bash -c '(${join_cmd} > /tmp/kubeadm-join.log 2>&1 && echo OK || echo FAIL) > /tmp/join-status.txt'" \
+      "bash -c '(${join_cmd//\"/\\\"} > /tmp/kubeadm-join.log 2>&1 && echo OK || echo FAIL) > /tmp/join-status.txt'" \
       >/dev/null 2>&1 || true
 
     status=$(ssh -o StrictHostKeyChecking=no "${user}@${node}" "cat /tmp/join-status.txt 2>/dev/null || echo FAIL")
