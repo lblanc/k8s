@@ -1,4 +1,4 @@
 ** Install master & workers **
 
-curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/install-k8s.sh | bash -
+curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/install-k8s.sh | sh -
 
