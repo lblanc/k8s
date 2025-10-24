@@ -106,24 +106,34 @@ wait
 echo -e "${GREEN}✅ Tous les nœuds sont configurés !${NC}"
 
 #==============================
-# Initialisation du master (robuste et non-bloquante)
+# Initialisation du master (non-bloquante)
 #==============================
 echo -e "${YELLOW}🚀 Initialisation du cluster Kubernetes sur ${masternode}${NC}"
 
 ssh -o StrictHostKeyChecking=no "${user}@${masternode}" 'bash -s' <<'EOF'
 set -e
+
 if [ -f /etc/kubernetes/admin.conf ]; then
   echo "[INFO] ✅ Cluster déjà initialisé, on saute kubeadm init."
 else
-  echo "[INFO] 🚀 Initialisation du cluster Kubernetes (non interactive)..."
+  echo "[INFO] 🚀 Initialisation du cluster Kubernetes (mode silencieux)..."
   sudo kubeadm reset -f >/dev/null 2>&1 || true
   sudo systemctl restart containerd
-  sudo kubeadm init \
-    --pod-network-cidr=10.244.0.0/16 \
-    --control-plane-endpoint=node1 \
-    --upload-certs \
-    --ignore-preflight-errors=all \
-    > /tmp/kubeadm-init.log 2>&1
+
+  ( sudo kubeadm init \
+      --pod-network-cidr=10.244.0.0/16 \
+      --control-plane-endpoint=node1 \
+      --upload-certs \
+      --ignore-preflight-errors=all \
+      > /tmp/kubeadm-init.log 2>&1
+    echo "[INFO] ✅ kubeadm init terminé." ) &
+
+  pid=$!
+  while kill -0 "$pid" 2>/dev/null; do
+    echo -n "."
+    sleep 5
+  done
+  echo
 
   mkdir -p /root/.kube
   sudo cp /etc/kubernetes/admin.conf /root/.kube/config
