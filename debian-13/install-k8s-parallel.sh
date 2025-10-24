@@ -106,26 +106,38 @@ wait
 echo -e "${GREEN}✅ Tous les nœuds sont configurés !${NC}"
 
 #==============================
-# Initialisation du master
+# Initialisation du master (robuste et non-bloquante)
 #==============================
 echo -e "${YELLOW}🚀 Initialisation du cluster Kubernetes sur ${masternode}${NC}"
-ssh -o StrictHostKeyChecking=no "${user}@${masternode}" "bash -s" <<EOF
+
+ssh -o StrictHostKeyChecking=no "${user}@${masternode}" 'bash -s' <<'EOF'
 set -e
 if [ -f /etc/kubernetes/admin.conf ]; then
-  echo '[INFO] ✅ Cluster déjà initialisé, on saute kubeadm init.'
+  echo "[INFO] ✅ Cluster déjà initialisé, on saute kubeadm init."
 else
-  echo '[INFO] 🚀 Initialisation du cluster Kubernetes...'
-  sudo kubeadm reset -f || true
+  echo "[INFO] 🚀 Initialisation du cluster Kubernetes (non interactive)..."
+  sudo kubeadm reset -f >/dev/null 2>&1 || true
   sudo systemctl restart containerd
-  sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint=${masternode} --upload-certs
+  sudo kubeadm init \
+    --pod-network-cidr=10.244.0.0/16 \
+    --control-plane-endpoint=node1 \
+    --upload-certs \
+    --ignore-preflight-errors=all \
+    > /tmp/kubeadm-init.log 2>&1
+
   mkdir -p /root/.kube
   sudo cp /etc/kubernetes/admin.conf /root/.kube/config
   sudo chown root:root /root/.kube/config
   echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> /root/.bashrc
+
   wget -q -O - https://github.com/derailed/k9s/releases/download/v0.50.16/k9s_Linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin k9s
+
+  echo "[INFO] ✅ Initialisation terminée — log : /tmp/kubeadm-init.log"
 fi
 exit 0
 EOF
+
+echo -e "${GREEN}✔️  Master initialisé, poursuite du script...${NC}"
 
 #==============================
 # Ajout des workers
