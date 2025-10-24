@@ -109,21 +109,23 @@ echo -e "${GREEN}✅ Tous les nœuds sont configurés !${NC}"
 # Initialisation du master
 #==============================
 echo -e "${YELLOW}🚀 Initialisation du cluster Kubernetes sur ${masternode}${NC}"
-
-ssh "${user}@${masternode}" "
-  if sudo test -f /etc/kubernetes/admin.conf; then
-    echo '[INFO] ✅ Cluster déjà initialisé, on saute kubeadm init.'
-  else
-    sudo kubeadm reset -f || true
-    sudo systemctl restart containerd
-    sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint=${masternode}
-    mkdir -p /root/.kube
-    sudo cp /etc/kubernetes/admin.conf /root/.kube/config
-    sudo chown root:root /root/.kube/config
-    echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> /root/.bashrc
-    wget -q -O - https://github.com/derailed/k9s/releases/download/v0.50.16/k9s_Linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin k9s
-  fi
-"
+ssh -o StrictHostKeyChecking=no "${user}@${masternode}" "bash -s" <<EOF
+set -e
+if [ -f /etc/kubernetes/admin.conf ]; then
+  echo '[INFO] ✅ Cluster déjà initialisé, on saute kubeadm init.'
+else
+  echo '[INFO] 🚀 Initialisation du cluster Kubernetes...'
+  sudo kubeadm reset -f || true
+  sudo systemctl restart containerd
+  sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint=${masternode} --upload-certs
+  mkdir -p /root/.kube
+  sudo cp /etc/kubernetes/admin.conf /root/.kube/config
+  sudo chown root:root /root/.kube/config
+  echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> /root/.bashrc
+  wget -q -O - https://github.com/derailed/k9s/releases/download/v0.50.16/k9s_Linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin k9s
+fi
+exit 0
+EOF
 
 #==============================
 # Ajout des workers
@@ -157,9 +159,8 @@ ssh "${user}@${masternode}" "
   fi
 "
 
-echo -e "${GREEN}✅ Cluster Kubernetes prêt !"
+echo -e "${GREEN}✅ Cluster Kubernetes prêt !${NC}"
 echo -e "👉 Commandes utiles :
   kubectl get nodes -o wide
   kubectl get pods -A
-  k9s
-${NC}"
+  k9s${NC}"
