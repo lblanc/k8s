@@ -91,7 +91,13 @@ for node in "${nodes[@]}"; do
   ) &
 done
 
-wait
+# Attente fiable (corrige le blocage)
+while [ "$(jobs -r | wc -l)" -gt 0 ]; do
+  sleep 1
+done
+wait 2>/dev/null || true
+sync
+
 echo -e "${GREEN}✅ Tous les nœuds sont configurés !${NC}"
 
 #==============================
@@ -99,7 +105,7 @@ echo -e "${GREEN}✅ Tous les nœuds sont configurés !${NC}"
 #==============================
 echo -e "${YELLOW}🚀 Initialisation du master (${masternode})${NC}"
 
-ssh -o StrictHostKeyChecking=no "${user}@${masternode}" 'bash -s' <<'EOF' >>/var/log/install-k8s.log 2>&1
+ssh -o StrictHostKeyChecking=no "${user}@${masternode}" 'bash -s' <<'EOF' >>"$LOGFILE" 2>&1
 set -e
 if [ -f /etc/kubernetes/admin.conf ]; then
   echo "[INFO] ✅ Master déjà initialisé."
@@ -147,7 +153,12 @@ for node in "${workernodes[@]}"; do
   ) &
 done
 
-wait
+while [ "$(jobs -r | wc -l)" -gt 0 ]; do
+  sleep 1
+done
+wait 2>/dev/null || true
+sync
+
 echo -e "${GREEN}✅ Tous les workers ont rejoint le cluster !${NC}"
 
 #==============================
@@ -156,11 +167,13 @@ echo -e "${GREEN}✅ Tous les workers ont rejoint le cluster !${NC}"
 echo -e "${YELLOW}🌐 Installation du réseau Flannel${NC}"
 ssh "${user}@${masternode}" "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml" >>"$LOGFILE" 2>&1 || true
 
+#==============================
+# Fin et résumé
+#==============================
 echo -e "${GREEN}✅ Cluster Kubernetes prêt !${NC}"
-echo -e "📝 Log complet disponible ici : ${LOGFILE}"
+echo -e "📝 Log complet : ${LOGFILE}"
 echo -e "👉 Commandes utiles :
   kubectl get nodes -o wide
   kubectl get pods -A
   k9s${NC}"
-
 echo "=== [$(date '+%F %T')] INSTALLATION TERMINÉE ==="
