@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -euo pipefail
 
 #==============================
@@ -17,7 +16,7 @@ workernodes=("node2" "node3" "node4")
 user="root"
 
 #==============================
-# Génération et distribution de clé SSH
+# SSH Key distribution
 #==============================
 echo -e "${YELLOW}🔑 Génération et distribution de la clé SSH...${NC}"
 [[ ! -f ~/.ssh/id_rsa ]] && ssh-keygen -q -f ~/.ssh/id_rsa -N ""
@@ -31,7 +30,7 @@ for node in "${nodes[@]}"; do
 done
 
 #==============================
-# Script distant commun pour tous les nœuds
+# Script distant pour tous les nœuds
 #==============================
 remote_setup=$(cat <<'EOF'
 set -euo pipefail
@@ -68,8 +67,10 @@ echo "[INFO] 🐳 Installation de containerd"
 sudo apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-echo "deb [arch=\$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \$(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
-sudo apt update -y && sudo apt install -y containerd.io
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+
+sudo apt update -y
+sudo apt install -y containerd.io
 
 echo "[INFO] 🧾 Configuration de containerd"
 sudo mkdir -p /etc/containerd
@@ -101,7 +102,7 @@ done
 #==============================
 echo -e "${YELLOW}🚀 Initialisation du cluster Kubernetes sur ${masternode}${NC}"
 ssh "${user}@${masternode}" "
-  sudo kubeadm reset -f
+  sudo kubeadm reset -f || true
   sudo systemctl restart containerd
   sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint=${masternode}
   mkdir -p \$HOME/.kube
