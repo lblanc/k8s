@@ -42,7 +42,7 @@ done
 #==============================
 remote_setup=$(cat <<'EOF'
 set -euo pipefail
-echo "[INFO] Configuration de base sur $(hostname)"
+echo "[INFO] [$(date '+%F %T')] Configuration de base sur $(hostname)"
 sudo hwclock --hctosys
 sudo swapoff -a && sudo sed -i '/ swap / s/^/#/' /etc/fstab
 cat <<EOT | sudo tee /etc/modules-load.d/k8s.conf >/dev/null
@@ -82,22 +82,17 @@ EOF
 # Configuration parallèle
 #==============================
 echo -e "${YELLOW}⚙️  Configuration des nœuds en parallèle...${NC}"
-
 for node in "${nodes[@]}"; do
+  echo -e "${BLUE}→ Configuration de ${node}${NC}"
   (
-    echo -e "${BLUE}→ Configuration de ${node}${NC}"
     ssh -o StrictHostKeyChecking=no "${user}@${node}" "bash -s" <<<"$remote_setup" >>"$LOGFILE" 2>&1
     echo -e "${GREEN}✔️  ${node} configuré${NC}"
   ) &
 done
 
-# Attente fiable (corrige le blocage)
-while [ "$(jobs -r | wc -l)" -gt 0 ]; do
-  sleep 1
-done
+# Attente de la fin des jobs
+while [ "$(jobs -r | wc -l)" -gt 0 ]; do sleep 2; done
 wait 2>/dev/null || true
-sync
-
 echo -e "${GREEN}✅ Tous les nœuds sont configurés !${NC}"
 
 #==============================
@@ -137,43 +132,76 @@ EOF
 echo -e "${GREEN}✔️ Master initialisé.${NC}"
 
 #==============================
-# Ajout des workers
+# Ajout des workers (auto-token + attente)
 #==============================
-echo -e "${YELLOW}🔗 Ajout des workers${NC}"
-join_cmd=$(ssh "${user}@${masternode}" "kubeadm token create --print-join-command")
+echo -e "${YELLOW}🔗 Ajout des workers au cluster${NC}"
+
+echo -e "${BLUE}⏳ Attente que le master soit prêt...${NC}"
+for i in {1..30}; do
+  if ssh -o StrictHostKeyChecking=no "${user}@${masternode}" "kubectl get nodes >/dev/null 2>&1"; then
+    echo -e "${GREEN}✅ API Kubernetes disponible${NC}"
+    break
+  fi
+  sleep 5
+done
+
+join_cmd=$(ssh -o StrictHostKeyChecking=no "${user}@${masternode}" \
+  "kubeadm token create --print-join-command --ttl 1h 2>/dev/null" | tr -d '\r')
+
+if [[ -z "$join_cmd" ]]; then
+  echo -e "${RED}❌ Impossible de générer la commande join !${NC}"
+  exit 1
+fi
+
+echo -e "${BLUE}→ Commande join générée :${NC}"
+echo "   ${join_cmd}"
+
+added=0
+failed=0
+rm -f /tmp/k8s_added_nodes /tmp/k8s_failed_nodes
 
 for node in "${workernodes[@]}"; do
+  echo -e "${BLUE}→ Ajout de ${node}${NC}"
   (
-    echo -e "${BLUE}→ Ajout de ${node}${NC}"
-    ssh "${user}@${node}" "sudo ${join_cmd}" >>"$LOGFILE" 2>&1
-    ssh "${user}@${node}" "mkdir -p /root/.kube"
-    scp "${user}@${masternode}:/root/.kube/config" "${user}@${node}:/root/.kube/config" >>"$LOGFILE" 2>&1
-    ssh "${user}@${node}" "chown root:root /root/.kube/config"
-    echo -e "${GREEN}✔️  ${node} ajouté au cluster${NC}"
+    ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 -o ServerAliveInterval=10 "${user}@${node}" \
+      "bash -c '(${join_cmd//\"/\\\"} > /tmp/kubeadm-join.log 2>&1 && echo OK || echo FAIL) > /tmp/join-status.txt'" \
+      >/dev/null 2>&1 || true
+
+    status=$(ssh -o StrictHostKeyChecking=no "${user}@${node}" "cat /tmp/join-status.txt 2>/dev/null || echo FAIL")
+    if [[ "$status" == "OK" ]]; then
+      ssh -o StrictHostKeyChecking=no "${user}@${node}" "mkdir -p /root/.kube" >>"$LOGFILE" 2>&1 || true
+      scp -o StrictHostKeyChecking=no "${user}@${masternode}:/root/.kube/config" "${user}@${node}:/root/.kube/config" >>"$LOGFILE" 2>&1 || true
+      ssh -o StrictHostKeyChecking=no "${user}@${node}" "chown root:root /root/.kube/config" >>"$LOGFILE" 2>&1 || true
+      echo -e "${GREEN}✔️  ${node} ajouté au cluster${NC}"
+      echo "${node}" >> /tmp/k8s_added_nodes
+    else
+      echo -e "${RED}❌  ${node} n'a pas rejoint le cluster${NC}"
+      echo "${node}" >> /tmp/k8s_failed_nodes
+    fi
   ) &
 done
 
-while [ "$(jobs -r | wc -l)" -gt 0 ]; do
-  sleep 1
-done
+while [ "$(jobs -r | wc -l)" -gt 0 ]; do sleep 1; done
 wait 2>/dev/null || true
 sync
 
-echo -e "${GREEN}✅ Tous les workers ont rejoint le cluster !${NC}"
+added=$(wc -l < /tmp/k8s_added_nodes 2>/dev/null || echo 0)
+failed=$(wc -l < /tmp/k8s_failed_nodes 2>/dev/null || echo 0)
+
+echo -e "${GREEN}✅ Workers traités : ${added} ajoutés, ${failed} échecs${NC}"
 
 #==============================
 # Installation Flannel
 #==============================
 echo -e "${YELLOW}🌐 Installation du réseau Flannel${NC}"
-ssh "${user}@${masternode}" "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml" >>"$LOGFILE" 2>&1 || true
+ssh -o StrictHostKeyChecking=no "${user}@${masternode}" \
+  "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml" \
+  >>"$LOGFILE" 2>&1 || true
 
 #==============================
-# Fin et résumé
+# Résumé final
 #==============================
 echo -e "${GREEN}✅ Cluster Kubernetes prêt !${NC}"
+ssh -o StrictHostKeyChecking=no "${user}@${masternode}" "kubectl get nodes -o wide" || true
 echo -e "📝 Log complet : ${LOGFILE}"
-echo -e "👉 Commandes utiles :
-  kubectl get nodes -o wide
-  kubectl get pods -A
-  k9s${NC}"
-echo "=== [$(date '+%F %T')] INSTALLATION TERMINÉE ==="
+echo -e "=== [$(date '+%F %T')] INSTALLATION TERMINÉE ==="
