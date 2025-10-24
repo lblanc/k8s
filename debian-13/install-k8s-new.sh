@@ -2,6 +2,14 @@
 set -euo pipefail
 
 #==============================
+# Logging global
+#==============================
+LOGFILE="/var/log/install-k8s.log"
+[ ! -w /var/log ] && LOGFILE="./install-k8s.log"
+exec > >(tee -a "$LOGFILE") 2>&1
+echo "=== [$(date '+%F %T')] DÉMARRAGE DU SCRIPT INSTALL-K8S ==="
+
+#==============================
 # Configuration
 #==============================
 RED='\033[0;31m'
@@ -34,15 +42,9 @@ done
 #==============================
 remote_setup=$(cat <<'EOF'
 set -euo pipefail
-
-echo "[INFO] ⏰ Synchronisation de l’horloge"
+echo "[INFO] [$(date '+%F %T')] Configuration de base sur $(hostname)"
 sudo hwclock --hctosys
-
-echo "[INFO] 🧹 Désactivation du swap"
-sudo swapoff -a
-sudo sed -i '/ swap / s/^/#/' /etc/fstab
-
-echo "[INFO] 🧩 Chargement des modules noyau"
+sudo swapoff -a && sudo sed -i '/ swap / s/^/#/' /etc/fstab
 cat <<EOT | sudo tee /etc/modules-load.d/k8s.conf >/dev/null
 overlay
 br_netfilter
@@ -51,36 +53,23 @@ ext4
 xfs
 EOT
 sudo modprobe overlay br_netfilter
-
-echo "[INFO] ⚙️  Configuration sysctl"
 cat <<EOT | sudo tee /etc/sysctl.d/k8s.conf >/dev/null
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 net.ipv4.ip_forward = 1
 EOT
 sudo sysctl --system >/dev/null
-
-echo "[INFO] 📦 Mise à jour du système"
 sudo apt update -y && sudo apt upgrade -y
-
-echo "[INFO] 🐳 Installation de containerd"
 sudo apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
-
-sudo apt update -y
-sudo apt install -y containerd.io
-
-echo "[INFO] 🧾 Configuration de containerd"
+sudo apt update -y && sudo apt install -y containerd.io
 sudo mkdir -p /etc/containerd
 containerd config default | sudo tee /etc/containerd/config.toml >/dev/null
 sudo sed -i '/disabled_plugins/s/^/#/' /etc/containerd/config.toml
 sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
 sudo systemctl enable --now containerd
-sudo systemctl restart containerd
-
-echo "[INFO] 🔑 Installation de Kubernetes (kubeadm, kubelet, kubectl)"
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list >/dev/null
@@ -90,45 +79,80 @@ EOF
 )
 
 #==============================
-# Exécution sur tous les nœuds
+# Configuration séquentielle (fiable)
 #==============================
+echo -e "${YELLOW}⚙️  Configuration des nœuds (séquentielle)...${NC}"
 for node in "${nodes[@]}"; do
-  echo -e "${YELLOW}⚙️  Configuration du nœud ${node}${NC}"
-  ssh -o StrictHostKeyChecking=no "${user}@${node}" "bash -s" <<<"$remote_setup"
+  echo -e "${BLUE}→ Configuration de ${node}${NC}"
+  ssh -o StrictHostKeyChecking=no "${user}@${node}" "bash -s" <<<"$remote_setup" >>"$LOGFILE" 2>&1
+  echo -e "${GREEN}✔️  ${node} configuré${NC}"
 done
 
-#==============================
-# Initialisation du cluster Kubernetes
-#==============================
-echo -e "${YELLOW}🚀 Initialisation du cluster Kubernetes sur ${masternode}${NC}"
-ssh "${user}@${masternode}" "
-  sudo kubeadm reset -f || true
-  sudo systemctl restart containerd
-  sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint=${masternode}
-  mkdir -p /root/.kube
-  sudo cp -i /etc/kubernetes/admin.conf /root/.kube/config
-  sudo chown root:root /root/.kube/config
-  wget -q -O - https://github.com/derailed/k9s/releases/download/v0.50.16/k9s_Linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin k9s
-"
+echo -e "${GREEN}✅ Tous les nœuds sont configurés !${NC}"
 
 #==============================
-# Ajout des nœuds workers
+# Initialisation du master
 #==============================
-echo -e "${YELLOW}🔗 Ajout des nœuds workers au cluster${NC}"
+echo -e "${YELLOW}🚀 Initialisation du master (${masternode})${NC}"
+
+ssh -o StrictHostKeyChecking=no "${user}@${masternode}" 'bash -s' <<'EOF' >>"$LOGFILE" 2>&1
+set -e
+if [ -f /etc/kubernetes/admin.conf ]; then
+  echo "[INFO] ✅ Master déjà initialisé."
+else
+  echo "[INFO] Démarrage kubeadm init..."
+  sudo kubeadm reset -f >/dev/null 2>&1 || true
+  sudo systemctl restart containerd
+  (
+    sudo kubeadm init \
+      --pod-network-cidr=10.244.0.0/16 \
+      --control-plane-endpoint=node1 \
+      --upload-certs \
+      --ignore-preflight-errors=all \
+      > /tmp/kubeadm-init.log 2>&1
+    echo "[INFO] kubeadm init terminé."
+  ) &
+  pid=$!
+  while kill -0 "$pid" 2>/dev/null; do sleep 5; done
+  mkdir -p /root/.kube
+  cp /etc/kubernetes/admin.conf /root/.kube/config
+  chown root:root /root/.kube/config
+  echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> /root/.bashrc
+  wget -q -O - https://github.com/derailed/k9s/releases/download/v0.50.16/k9s_Linux_amd64.tar.gz | tar -xz -C /usr/local/bin k9s
+  echo "[INFO] ✅ Initialisation terminée."
+fi
+exit 0
+EOF
+
+echo -e "${GREEN}✔️ Master initialisé.${NC}"
+
+#==============================
+# Ajout des workers
+#==============================
+echo -e "${YELLOW}🔗 Ajout des workers${NC}"
 join_cmd=$(ssh "${user}@${masternode}" "kubeadm token create --print-join-command")
 
 for node in "${workernodes[@]}"; do
-  echo -e "${BLUE}→ Worker ${node}${NC}"
-  ssh "${user}@${node}" "sudo ${join_cmd}"
+  echo -e "${BLUE}→ Ajout de ${node}${NC}"
+  ssh "${user}@${node}" "sudo ${join_cmd}" >>"$LOGFILE" 2>&1
   ssh "${user}@${node}" "mkdir -p /root/.kube"
-  scp "${user}@${masternode}:/root/.kube/config" "${user}@${node}:/root/.kube/config" >/dev/null
-  ssh "${user}@${node}" "sudo chown root:root /root/.kube/config"
+  scp "${user}@${masternode}:/root/.kube/config" "${user}@${node}:/root/.kube/config" >>"$LOGFILE" 2>&1
+  ssh "${user}@${node}" "chown root:root /root/.kube/config"
+  echo -e "${GREEN}✔️  ${node} ajouté au cluster${NC}"
 done
 
+echo -e "${GREEN}✅ Tous les workers ont rejoint le cluster !${NC}"
+
 #==============================
-# Installation du réseau Flannel
+# Installation Flannel
 #==============================
 echo -e "${YELLOW}🌐 Installation du réseau Flannel${NC}"
-ssh "${user}@${masternode}" "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml"
+ssh "${user}@${masternode}" "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml" >>"$LOGFILE" 2>&1 || true
 
-echo -e "${GREEN}✅ Cluster Kubernetes prêt ! Lance 'kubectl get nodes' ou 'k9s' pour administrer.${NC}"
+#==============================
+# Résumé final
+#==============================
+echo -e "${GREEN}✅ Cluster Kubernetes prêt !${NC}"
+ssh "${user}@${masternode}" "kubectl get nodes -o wide" || true
+echo -e "📝 Log complet : ${LOGFILE}"
+echo -e "=== [$(date '+%F %T')] INSTALLATION TERMINÉE ==="
