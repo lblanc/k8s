@@ -126,25 +126,31 @@ EOF
 echo -e "${GREEN}✔️ Master initialisé.${NC}"
 
 #==============================
-# Ajout des workers (robuste)
+# Ajout des workers (non bloquant)
 #==============================
 echo -e "${YELLOW}🔗 Ajout des workers au cluster${NC}"
 join_cmd=$(ssh -o StrictHostKeyChecking=no "${user}@${masternode}" "kubeadm token create --print-join-command")
 
 added=0
 failed=0
+rm -f /tmp/k8s_added_nodes /tmp/k8s_failed_nodes
 
 for node in "${workernodes[@]}"; do
   echo -e "${BLUE}→ Ajout de ${node}${NC}"
   (
-    if ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 -o ServerAliveInterval=10 "${user}@${node}" "sudo ${join_cmd}" >>"$LOGFILE" 2>&1; then
+    ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 -o ServerAliveInterval=10 "${user}@${node}" \
+      "bash -c '(${join_cmd} > /tmp/kubeadm-join.log 2>&1 && echo OK || echo FAIL) > /tmp/join-status.txt'" \
+      >/dev/null 2>&1 || true
+
+    status=$(ssh -o StrictHostKeyChecking=no "${user}@${node}" "cat /tmp/join-status.txt 2>/dev/null || echo FAIL")
+    if [[ "\$status" == "OK" ]]; then
       ssh -o StrictHostKeyChecking=no "${user}@${node}" "mkdir -p /root/.kube" >>"$LOGFILE" 2>&1 || true
       scp -o StrictHostKeyChecking=no "${user}@${masternode}:/root/.kube/config" "${user}@${node}:/root/.kube/config" >>"$LOGFILE" 2>&1 || true
       ssh -o StrictHostKeyChecking=no "${user}@${node}" "chown root:root /root/.kube/config" >>"$LOGFILE" 2>&1 || true
       echo -e "${GREEN}✔️  ${node} ajouté au cluster${NC}"
       echo "${node}" >> /tmp/k8s_added_nodes
     else
-      echo -e "${RED}❌  Échec ajout de ${node}${NC}"
+      echo -e "${RED}❌  ${node} n'a pas rejoint le cluster${NC}"
       echo "${node}" >> /tmp/k8s_failed_nodes
     fi
   ) &
@@ -158,13 +164,15 @@ sync
 added=$(wc -l < /tmp/k8s_added_nodes 2>/dev/null || echo 0)
 failed=$(wc -l < /tmp/k8s_failed_nodes 2>/dev/null || echo 0)
 
-echo -e "${GREEN}✅ Tous les workers traités : ${added} ajoutés, ${failed} échecs${NC}"
+echo -e "${GREEN}✅ Workers traités : ${added} ajoutés, ${failed} échecs${NC}"
 
 #==============================
 # Installation Flannel
 #==============================
 echo -e "${YELLOW}🌐 Installation du réseau Flannel${NC}"
-ssh -o StrictHostKeyChecking=no "${user}@${masternode}" "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml" >>"$LOGFILE" 2>&1 || true
+ssh -o StrictHostKeyChecking=no "${user}@${masternode}" \
+  "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml" \
+  >>"$LOGFILE" 2>&1 || true
 
 #==============================
 # Résumé final
