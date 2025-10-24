@@ -126,13 +126,29 @@ EOF
 echo -e "${GREEN}✔️ Master initialisé.${NC}"
 
 #==============================
-# Ajout des workers (corrigé + auto-token)
+# Ajout des workers (auto-token + attente)
 #==============================
 echo -e "${YELLOW}🔗 Ajout des workers au cluster${NC}"
 
-# Regénère un token valide à chaque run
+echo -e "${BLUE}⏳ Attente que le master soit prêt...${NC}"
+for i in {1..30}; do
+  if ssh -o StrictHostKeyChecking=no "${user}@${masternode}" "kubectl get nodes >/dev/null 2>&1"; then
+    echo -e "${GREEN}✅ API Kubernetes disponible${NC}"
+    break
+  fi
+  sleep 5
+done
+
 join_cmd=$(ssh -o StrictHostKeyChecking=no "${user}@${masternode}" \
-  "kubeadm token create --print-join-command --ttl 1h 2>/dev/null")
+  "kubeadm token create --print-join-command --ttl 1h 2>/dev/null" | tr -d '\r')
+
+if [[ -z "$join_cmd" ]]; then
+  echo -e "${RED}❌ Impossible de générer la commande join !${NC}"
+  exit 1
+fi
+
+echo -e "${BLUE}→ Commande join générée :${NC}"
+echo "   ${join_cmd}"
 
 added=0
 failed=0
@@ -146,7 +162,7 @@ for node in "${workernodes[@]}"; do
       >/dev/null 2>&1 || true
 
     status=$(ssh -o StrictHostKeyChecking=no "${user}@${node}" "cat /tmp/join-status.txt 2>/dev/null || echo FAIL")
-    if [[ "\$status" == "OK" ]]; then
+    if [[ "$status" == "OK" ]]; then
       ssh -o StrictHostKeyChecking=no "${user}@${node}" "mkdir -p /root/.kube" >>"$LOGFILE" 2>&1 || true
       scp -o StrictHostKeyChecking=no "${user}@${masternode}:/root/.kube/config" "${user}@${node}:/root/.kube/config" >>"$LOGFILE" 2>&1 || true
       ssh -o StrictHostKeyChecking=no "${user}@${node}" "chown root:root /root/.kube/config" >>"$LOGFILE" 2>&1 || true
@@ -159,7 +175,6 @@ for node in "${workernodes[@]}"; do
   ) &
 done
 
-# Attente propre
 while [ "$(jobs -r | wc -l)" -gt 0 ]; do sleep 1; done
 wait 2>/dev/null || true
 sync
