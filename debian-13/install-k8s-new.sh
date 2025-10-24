@@ -30,7 +30,7 @@ for node in "${nodes[@]}"; do
 done
 
 #==============================
-# Script distant pour tous les nœuds
+# Script distant commun
 #==============================
 remote_setup=$(cat <<'EOF'
 set -euo pipefail
@@ -60,7 +60,7 @@ net.ipv4.ip_forward = 1
 EOT
 sudo sysctl --system >/dev/null
 
-echo "[INFO] 📦 Mise à jour système"
+echo "[INFO] 📦 Mise à jour du système"
 sudo apt update -y && sudo apt upgrade -y
 
 echo "[INFO] 🐳 Installation de containerd"
@@ -105,9 +105,9 @@ ssh "${user}@${masternode}" "
   sudo kubeadm reset -f || true
   sudo systemctl restart containerd
   sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint=${masternode}
-  mkdir -p \$HOME/.kube
-  sudo cp -i /etc/kubernetes/admin.conf \$HOME/.kube/config
-  sudo chown \$(id -u):\$(id -g) \$HOME/.kube/config
+  mkdir -p /root/.kube
+  sudo cp -i /etc/kubernetes/admin.conf /root/.kube/config
+  sudo chown root:root /root/.kube/config
   wget -q -O - https://github.com/derailed/k9s/releases/download/v0.50.16/k9s_Linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin k9s
 "
 
@@ -120,9 +120,9 @@ join_cmd=$(ssh "${user}@${masternode}" "kubeadm token create --print-join-comman
 for node in "${workernodes[@]}"; do
   echo -e "${BLUE}→ Worker ${node}${NC}"
   ssh "${user}@${node}" "sudo ${join_cmd}"
-  ssh "${user}@${node}" "mkdir -p \$HOME/.kube"
-  scp "${user}@${masternode}:\$HOME/.kube/config" "${user}@${node}:\$HOME/.kube/config" >/dev/null
-  ssh "${user}@${node}" "sudo chown \$(id -u):\$(id -g) \$HOME/.kube/config"
+  ssh "${user}@${node}" "mkdir -p /root/.kube"
+  scp "${user}@${masternode}:/root/.kube/config" "${user}@${node}:/root/.kube/config" >/dev/null
+  ssh "${user}@${node}" "sudo chown root:root /root/.kube/config"
 done
 
 #==============================
@@ -131,4 +131,4 @@ done
 echo -e "${YELLOW}🌐 Installation du réseau Flannel${NC}"
 ssh "${user}@${masternode}" "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml"
 
-echo -e "${GREEN}✅ Cluster Kubernetes prêt ! Lance 'k9s' pour administrer.${NC}"
+echo -e "${GREEN}✅ Cluster Kubernetes prêt ! Lance 'kubectl get nodes' ou 'k9s' pour administrer.${NC}"
