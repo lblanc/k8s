@@ -2,3 +2,9 @@
 
 curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/install-k8s.sh | sh -
 
+
+******************************************************************************************************************************
+
+** Install headlamp + certmanage + nginx **
+
+curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/install-headlamp.sh | bash -
