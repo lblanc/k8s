@@ -79,15 +79,14 @@ EOF
 )
 
 #==============================
-# Configuration séquentielle (fiable)
+# Configuration séquentielle fiable
 #==============================
-echo -e "${YELLOW}⚙️  Configuration des nœuds (séquentielle)...${NC}"
+echo -e "${YELLOW}⚙️  Configuration des nœuds...${NC}"
 for node in "${nodes[@]}"; do
   echo -e "${BLUE}→ Configuration de ${node}${NC}"
   ssh -o StrictHostKeyChecking=no "${user}@${node}" "bash -s" <<<"$remote_setup" >>"$LOGFILE" 2>&1
   echo -e "${GREEN}✔️  ${node} configuré${NC}"
 done
-
 echo -e "${GREEN}✅ Tous les nœuds sont configurés !${NC}"
 
 #==============================
@@ -127,32 +126,50 @@ EOF
 echo -e "${GREEN}✔️ Master initialisé.${NC}"
 
 #==============================
-# Ajout des workers
+# Ajout des workers (robuste)
 #==============================
-echo -e "${YELLOW}🔗 Ajout des workers${NC}"
-join_cmd=$(ssh "${user}@${masternode}" "kubeadm token create --print-join-command")
+echo -e "${YELLOW}🔗 Ajout des workers au cluster${NC}"
+join_cmd=$(ssh -o StrictHostKeyChecking=no "${user}@${masternode}" "kubeadm token create --print-join-command")
+
+added=0
+failed=0
 
 for node in "${workernodes[@]}"; do
   echo -e "${BLUE}→ Ajout de ${node}${NC}"
-  ssh "${user}@${node}" "sudo ${join_cmd}" >>"$LOGFILE" 2>&1
-  ssh "${user}@${node}" "mkdir -p /root/.kube"
-  scp "${user}@${masternode}:/root/.kube/config" "${user}@${node}:/root/.kube/config" >>"$LOGFILE" 2>&1
-  ssh "${user}@${node}" "chown root:root /root/.kube/config"
-  echo -e "${GREEN}✔️  ${node} ajouté au cluster${NC}"
+  (
+    if ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 -o ServerAliveInterval=10 "${user}@${node}" "sudo ${join_cmd}" >>"$LOGFILE" 2>&1; then
+      ssh -o StrictHostKeyChecking=no "${user}@${node}" "mkdir -p /root/.kube" >>"$LOGFILE" 2>&1 || true
+      scp -o StrictHostKeyChecking=no "${user}@${masternode}:/root/.kube/config" "${user}@${node}:/root/.kube/config" >>"$LOGFILE" 2>&1 || true
+      ssh -o StrictHostKeyChecking=no "${user}@${node}" "chown root:root /root/.kube/config" >>"$LOGFILE" 2>&1 || true
+      echo -e "${GREEN}✔️  ${node} ajouté au cluster${NC}"
+      echo "${node}" >> /tmp/k8s_added_nodes
+    else
+      echo -e "${RED}❌  Échec ajout de ${node}${NC}"
+      echo "${node}" >> /tmp/k8s_failed_nodes
+    fi
+  ) &
 done
 
-echo -e "${GREEN}✅ Tous les workers ont rejoint le cluster !${NC}"
+# Attente propre
+while [ "$(jobs -r | wc -l)" -gt 0 ]; do sleep 1; done
+wait 2>/dev/null || true
+sync
+
+added=$(wc -l < /tmp/k8s_added_nodes 2>/dev/null || echo 0)
+failed=$(wc -l < /tmp/k8s_failed_nodes 2>/dev/null || echo 0)
+
+echo -e "${GREEN}✅ Tous les workers traités : ${added} ajoutés, ${failed} échecs${NC}"
 
 #==============================
 # Installation Flannel
 #==============================
 echo -e "${YELLOW}🌐 Installation du réseau Flannel${NC}"
-ssh "${user}@${masternode}" "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml" >>"$LOGFILE" 2>&1 || true
+ssh -o StrictHostKeyChecking=no "${user}@${masternode}" "kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml" >>"$LOGFILE" 2>&1 || true
 
 #==============================
 # Résumé final
 #==============================
 echo -e "${GREEN}✅ Cluster Kubernetes prêt !${NC}"
-ssh "${user}@${masternode}" "kubectl get nodes -o wide" || true
+ssh -o StrictHostKeyChecking=no "${user}@${masternode}" "kubectl get nodes -o wide" || true
 echo -e "📝 Log complet : ${LOGFILE}"
 echo -e "=== [$(date '+%F %T')] INSTALLATION TERMINÉE ==="
