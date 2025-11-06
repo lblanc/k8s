@@ -56,7 +56,6 @@ ssh ${user}@${node} "cat <<EOF | sudo tee /etc/modprobe.d/nvme_core.conf
 options nvme_core multipath=Y
 EOF"
 ssh ${user}@${node} "update-initramfs -u"
-ssh ${user}@${node} "sudo modprobe br_netfilter"
 
 
 # Enable Forwarding
