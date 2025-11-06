@@ -15,3 +15,12 @@ chmod +x install-headlamp.sh
 ## DOMAIN="headlamp.k8s-lab0.demo-lab.site"
 
 ./install-headlamp.sh
+
+
+******************************************************************************************************************************
+
+** Install Puls8 **
+
+wget https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/install-puls8.sh
+chmod +x install-puls8.sh
+./install-puls8.sh
