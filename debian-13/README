@@ -24,3 +24,12 @@ chmod +x install-headlamp.sh
 wget https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/install-puls8.sh
 chmod +x install-puls8.sh
 ./install-puls8.sh
+
+
+******************************************************************************************************************************
+
+** Install Draw.io **
+
+wget https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/install-drawio.sh
+chmod +x install-drawio.sh
+./install-drawio.sh
