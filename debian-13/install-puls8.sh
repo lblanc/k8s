@@ -43,7 +43,9 @@ echo "🔹 Déploiement de Puls8 via Helm..."
 helm install "${HELM_RELEASE}" -n "${NAMESPACE}" --create-namespace "${HELM_REPO}" \
   --set openebs.engines.replicated.mayastor.enabled=true \
   --set openebs.engines.local.lvm.enabled=false \
-  --set openebs.engines.local.zfs.enabled=false
+  --set openebs.engines.local.zfs.enabled=false \
+  --set etcd.image.repository=docker.io/bitnami/etcd \
+  --set etcd.image.tag=3.5.15-debian-12-r2
 
 echo
 echo "✅ Chart Puls8 installé avec succès."
