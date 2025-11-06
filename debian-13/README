@@ -10,7 +10,7 @@ curl -sfL -H 'Pragma: no-cache' https://raw.githubusercontent.com/lblanc/k8s/mai
 wget https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/install-headlamp.sh
 chmod +x install-headlamp.sh
 
-## Change varialble before run :
+## Change varialbles before run :
 ## EMAIL="email@luc-blanc.com"
 ## DOMAIN="headlamp.k8s-lab0.demo-lab.site"
 
