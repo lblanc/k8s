@@ -136,6 +136,8 @@ ssh ${user}@${masternode} "mkdir -p $HOME/.kube"
 ssh ${user}@${masternode} "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config"
 ssh ${user}@${masternode} "sudo chown $(id -u):$(id -g) $HOME/.kube/config"
 ssh ${user}@${masternode} "tar -xvz  -f <(wget -q -O - https://github.com/derailed/k9s/releases/download/v0.50.16/k9s_Linux_amd64.tar.gz ) k9s"
+ssh ${user}@${masternode} "sudo chmod +x  k9s"
+ssh ${user}@${masternode} "sudo mv k9s /usr/bin"
 
 sleep 30
 
