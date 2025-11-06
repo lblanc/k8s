@@ -127,6 +127,12 @@ echo
 echo "✅ Ingress Headlamp appliqué."
 pause
 
+echo "🔹 Installe le metrics-server ..."
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+echo
+echo "✅ metrics-server appliqué."
+pause
+
 echo "🌐 Installation terminée."
 echo "Accès via : https://${DOMAIN}"
 echo "Ports NodePort exposés : 32080 (HTTP), 32443 (HTTPS)"
