@@ -13,12 +13,25 @@ pause() {
   echo
 }
 
+install_helm() {
+  echo "🔹 Téléchargement et installation de Helm..."
+  curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+  echo "✅ Helm installé avec succès ($(helm version --short))"
+}
+
 echo "🔹 Vérification de la présence d'Helm..."
 if ! command -v helm &>/dev/null; then
-  echo "❌ Helm n'est pas installé. Installe-le avant de continuer."
-  exit 1
+  echo "⚠️ Helm n'est pas détecté sur ce système."
+  read -rp "Souhaites-tu que je l’installe automatiquement ? (y/N) " confirm
+  if [[ "${confirm,,}" == "y" ]]; then
+    install_helm
+  else
+    echo "❌ Installation annulée. Helm est requis pour continuer."
+    exit 1
+  fi
+else
+  echo "✅ Helm est déjà installé ($(helm version --short))"
 fi
-echo "✅ Helm est installé."
 pause
 
 echo "🔹 Création du namespace '${NAMESPACE}' (si nécessaire)..."
