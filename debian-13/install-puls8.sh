@@ -40,12 +40,9 @@ echo "✅ Namespace ${NAMESPACE} prêt."
 pause
 
 echo "🔹 Déploiement de Puls8 via Helm..."
-helm install "${HELM_RELEASE}" -n "${NAMESPACE}" --create-namespace "${HELM_REPO}" \
-  --set openebs.engines.replicated.mayastor.enabled=true \
-  --set openebs.engines.local.lvm.enabled=false \
-  --set openebs.engines.local.zfs.enabled=false \
-  --set openebs.engines.replicated.mayastor.etcd.image.repository=docker.io/bitnami/etcd \
-  --set openebs.engines.replicated.mayastor.etcd.image.tag=3.5.15-debian-12-r2
+helm install "${HELM_RELEASE}" -n "${NAMESPACE}" --create-namespace "${HELM_REPO}" \ \
+--set openebs.mayastor.etcd.image.repository=openebs/etcd,openebs.preUpgradeHook.image.repo=openebs/kubectl,backup.velero.kubectl.image.repository=docker.io/openebs/kubectl,openebs.engines.replicated.mayastor.enabled=true,openebs.engines.local.lvm.enabled=false,openebs.engines.local.zfs.enabled=false
+
 
 echo
 echo "✅ Chart Puls8 installé avec succès."
