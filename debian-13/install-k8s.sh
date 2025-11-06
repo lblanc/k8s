@@ -49,6 +49,16 @@ EOF"
 ssh ${user}@${node} "sudo modprobe overlay"
 ssh ${user}@${node} "sudo modprobe br_netfilter"
 
+
+# Configure native NVMe multipathing for High Availability
+echo "${YELLOW}Configure native NVMe multipathing for High Availability: $node${NC}"
+ssh ${user}@${node} "cat <<EOF | sudo tee /etc/modprobe.d/nvme_core.conf
+options nvme_core multipath=Y
+EOF"
+ssh ${user}@${node} "update-initramfs -u"
+ssh ${user}@${node} "sudo modprobe br_netfilter"
+
+
 # Enable Forwarding
 echo "${YELLOW}Enable Forwarding on node: $node${NC}"
 ssh ${user}@${node} "sudo tee /etc/sysctl.d/k8s.conf <<EOF
@@ -56,6 +66,13 @@ net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 net.ipv4.ip_forward = 1
 EOF"
+
+# Enable Persist Huge Page settings
+echo "${YELLOW}Enable Persist Huge Page settings on node: $node${NC}"
+ssh ${user}@${node} "sudo tee /etc/sysctl.d/Puls8.conf <<EOF
+vm.nr_hugepages = 1024
+EOF"
+
 ssh ${user}@${node} "sudo sysctl --system"
 
 # Update
