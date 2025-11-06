@@ -131,6 +131,20 @@ echo "🔹 Installe le metrics-server ..."
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 echo
 echo "✅ metrics-server appliqué."
+
+echo "🔹 Patch du metrics-server pour ignorer la vérification TLS..."
+kubectl -n kube-system patch deployment metrics-server \
+  --type='json' \
+  -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
+
+echo "🔹 Redémarrage du metrics-server..."
+kubectl rollout restart deployment metrics-server -n kube-system
+
+echo
+echo "✅ Correction TLS appliquée au metrics-server."
+echo "Tu peux vérifier avec : kubectl logs -n kube-system -l k8s-app=metrics-server"
+echo
+echo "Puis tester : kubectl top nodes"
 pause
 
 echo "🌐 Installation terminée."
