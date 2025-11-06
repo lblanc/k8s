@@ -40,7 +40,7 @@ echo "✅ Namespace ${NAMESPACE} prêt."
 pause
 
 echo "🔹 Déploiement de Puls8 via Helm..."
-helm install "${HELM_RELEASE}" -n "${NAMESPACE}" --create-namespace "${HELM_REPO}" \ \
+helm install "${HELM_RELEASE}" -n "${NAMESPACE}" --create-namespace "${HELM_REPO}" \
 --set openebs.mayastor.etcd.image.repository=openebs/etcd,openebs.preUpgradeHook.image.repo=openebs/kubectl,backup.velero.kubectl.image.repository=docker.io/openebs/kubectl,openebs.engines.replicated.mayastor.enabled=true,openebs.engines.local.lvm.enabled=false,openebs.engines.local.zfs.enabled=false
 
 
