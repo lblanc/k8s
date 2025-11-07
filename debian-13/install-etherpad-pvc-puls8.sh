@@ -57,7 +57,7 @@ spec:
   - ReadWriteOnce
   resources:
     requests:
-      storage: {STORAGE_SIZE}
+      storage: ${STORAGE_SIZE}
   storageClassName: mayastor-2
 EOF
 kubectl apply -f etherpad-pvc.yaml
