@@ -58,7 +58,7 @@ pause
 
 
 echo "🔹 Installation du plugin Puls8..."
-for node in ${workernodes}; do
+for node in ${nodes}; do
 ssh ${user}@${node} "wget https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/kubectl-puls8-x86_64-linux-musl.tar.gz"
 ssh ${user}@${node} "tar -xvzf kubectl-puls8-x86_64-linux-musl.tar.gz"
 ssh ${user}@${node} "sudo mv kubectl-puls8 /usr/local/bin/"
