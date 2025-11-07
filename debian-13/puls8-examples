@@ -1,0 +1,67 @@
+
+## Create DiskPools on each node
+
+cat <<EOF | kubectl create -f -
+apiVersion: "openebs.io/v1beta3"
+kind: DiskPool
+metadata:
+  name: pool-on-node-2
+  namespace: puls8
+spec:
+  node: node2
+  disks: ["auring:///dev/vdb"]
+EOF
+
+cat <<EOF | kubectl create -f -
+apiVersion: "openebs.io/v1beta3"
+kind: DiskPool
+metadata:
+  name: pool-on-node-3
+  namespace: puls8
+spec:
+  node: node3
+  disks: ["auring:///dev/vdb"]
+EOF
+
+cat <<EOF | kubectl create -f -
+apiVersion: "openebs.io/v1beta3"
+kind: DiskPool
+metadata:
+  name: pool-on-node-4
+  namespace: puls8
+spec:
+  node: node4
+  disks: ["auring:///dev/vdb"]
+EOF
+
+
+## Create StorageClass and PVC
+
+cat <<EOF | kubectl create -f -
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: mayastor-2
+parameters:
+  protocol: nvmf
+  repl: "2"
+  fsType: "xfs"
+provisioner: io.openebs.csi-mayastor
+reclaimPolicy: Delete 
+EOF
+
+
+
+cat <<EOF | kubectl create -f -
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ms-volume-claim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: mayastor-2
+EOF
