@@ -5,6 +5,13 @@ set -euo pipefail
 NAMESPACE="puls8"
 HELM_RELEASE="puls8"
 HELM_REPO="oci://docker.io/datacoresoftware/puls8"
+# Mastes + Workers nodes list
+nodes="node1 node2 node3 node4"
+masternode="node1"
+workernodes="node2 node3 node4"
+
+# Linux user
+user="root"
 # ===========================
 
 pause() {
@@ -48,6 +55,19 @@ echo
 echo "✅ Chart Puls8 installé avec succès."
 echo "Tu peux vérifier les ressources avec : kubectl get pods -n ${NAMESPACE}"
 pause
+
+
+echo "🔹 Installation du plugin Puls8..."
+for node in ${workernodes}; do
+ssh ${user}@${node} "wget https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/kubectl-puls8-x86_64-linux-musl.tar.gz"
+ssh ${user}@${node} "tar -xvzf kubectl-puls8-x86_64-linux-musl.tar.gz"
+ssh ${user}@${node} "sudo mv kubectl-puls8 /usr/local/bin/"
+done
+
+echo
+echo "✅ Plugin Puls8 installé avec succès."
+pause
+
 
 echo "🔹 Vérification des pods..."
 kubectl get pods -n "${NAMESPACE}" -o wide || true
