@@ -3,7 +3,7 @@ set -euo pipefail
 
 # ========= CONFIG ==========
 EMAIL="email@luc-blanc.com"
-DOMAIN="drawio.k8s-lab0.demo-lab.site"
+DOMAIN="drawio.k8s-lab1.demo-lab.site"
 NAMESPACE="drawio"
 # ===========================
 
