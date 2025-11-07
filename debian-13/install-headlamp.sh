@@ -3,7 +3,7 @@ set -euo pipefail
 
 # ========= CONFIG ==========
 EMAIL="email@luc-blanc.com"
-DOMAIN="headlamp.k8s-lab0.demo-lab.site"
+DOMAIN="headlamp.k8s-lab1.demo-lab.site"
 # ===========================
 
 pause() {
