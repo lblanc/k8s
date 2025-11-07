@@ -47,7 +47,7 @@ kubectl apply -f cluster-issuer.yaml
 echo "✅ ClusterIssuer letsencrypt-prod appliqué."
 pause
 
-echo "🔹 Création du PersistentVolumeClaim Puls8 pour le stockage d’Etherpad..."
+echo "🔹 Création du PVC Puls8 pour le stockage d’Etherpad..."
 cat <<EOF > etherpad-pvc.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -66,7 +66,7 @@ kubectl apply -f etherpad-pvc.yaml
 echo "✅ PVC créé (${STORAGE_SIZE}, classe ${STORAGE_CLASS})."
 pause
 
-echo "🔹 Déploiement de Etherpad (avec initContainer pour fixer les permissions)..."
+echo "🔹 Déploiement de Etherpad (avec correctif de permissions)..."
 cat <<EOF > etherpad-deploy.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -86,7 +86,7 @@ spec:
       initContainers:
         - name: fix-permissions
           image: busybox
-          command: ["sh", "-c", "chown -R 9001:9001 /opt/etherpad-lite/var"]
+          command: ["sh", "-c", "chmod -R 777 /opt/etherpad-lite/var || true"]
           volumeMounts:
             - name: etherpad-data
               mountPath: /opt/etherpad-lite/var
@@ -96,6 +96,9 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9001
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
           env:
             - name: TITLE
               value: "Etherpad Demo"
@@ -104,7 +107,7 @@ spec:
             - name: ADMIN_PASSWORD
               value: "changeme"
             - name: DB_TYPE
-              value: "dirty"  # SQLite-like, persiste dans /opt/etherpad-lite/var
+              value: "dirty"
           volumeMounts:
             - name: etherpad-data
               mountPath: /opt/etherpad-lite/var
@@ -144,7 +147,7 @@ kubectl apply -f etherpad-deploy.yaml
 echo "✅ Etherpad déployé."
 pause
 
-echo "🔹 Création de l'Ingress Etherpad (TLS + rewrite, compatible regex)..."
+echo "🔹 Création de l'Ingress Etherpad (TLS + rewrite)..."
 cat <<EOF > etherpad-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
