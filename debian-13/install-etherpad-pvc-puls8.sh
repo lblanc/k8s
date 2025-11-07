@@ -5,6 +5,7 @@ set -euo pipefail
 EMAIL="email@luc-blanc.com"
 DOMAIN="etherpad.k8s-lab1.demo-lab.site"
 NAMESPACE="etherpad"
+STORAGE_SIZE="8Gi"
 # ===========================
 
 pause() {
@@ -44,6 +45,24 @@ kubectl apply -f cluster-issuer.yaml
 echo "✅ ClusterIssuer letsencrypt-prod appliqué."
 pause
 
+echo "🔹 Création du PersistentVolumeClaim Puls8 pour le stockage d’Etherpad..."
+cat <<EOF > etherpad-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ms-volume-claim
+  namespace: ${NAMESPACE}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {STORAGE_SIZE}
+  storageClassName: mayastor-2
+EOF
+kubectl apply -f etherpad-pvc.yaml
+echo "✅ PVC créé (${STORAGE_SIZE})."
+pause
 
 echo "🔹 Déploiement de Etherpad (avec volume persistant Puls8)..."
 cat <<EOF > etherpad-deploy.yaml
