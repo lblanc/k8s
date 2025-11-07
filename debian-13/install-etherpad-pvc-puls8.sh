@@ -6,6 +6,8 @@ EMAIL="email@luc-blanc.com"
 DOMAIN="etherpad.k8s-lab1.demo-lab.site"
 NAMESPACE="etherpad"
 STORAGE_SIZE="8Gi"
+STORAGE_CLASS="mayastor-2"
+PVC_NAME="ms-volume-claim"
 # ===========================
 
 pause() {
@@ -50,21 +52,21 @@ cat <<EOF > etherpad-pvc.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: ms-volume-claim
+  name: ${PVC_NAME}
   namespace: ${NAMESPACE}
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
       storage: ${STORAGE_SIZE}
-  storageClassName: mayastor-2
+  storageClassName: ${STORAGE_CLASS}
 EOF
 kubectl apply -f etherpad-pvc.yaml
-echo "✅ PVC créé (${STORAGE_SIZE})."
+echo "✅ PVC créé (${STORAGE_SIZE}, classe ${STORAGE_CLASS})."
 pause
 
-echo "🔹 Déploiement de Etherpad (avec volume persistant Puls8)..."
+echo "🔹 Déploiement de Etherpad (avec initContainer pour fixer les permissions)..."
 cat <<EOF > etherpad-deploy.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -81,6 +83,13 @@ spec:
       labels:
         app: etherpad
     spec:
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 9001:9001 /opt/etherpad-lite/var"]
+          volumeMounts:
+            - name: etherpad-data
+              mountPath: /opt/etherpad-lite/var
       containers:
         - name: etherpad
           image: etherpad/etherpad:latest
@@ -114,7 +123,7 @@ spec:
       volumes:
         - name: etherpad-data
           persistentVolumeClaim:
-            claimName: ms-volume-claim
+            claimName: ${PVC_NAME}
 ---
 apiVersion: v1
 kind: Service
@@ -135,7 +144,7 @@ kubectl apply -f etherpad-deploy.yaml
 echo "✅ Etherpad déployé."
 pause
 
-echo "🔹 Création de l'Ingress Etherpad (TLS + rewrite)..."
+echo "🔹 Création de l'Ingress Etherpad (TLS + rewrite, compatible regex)..."
 cat <<EOF > etherpad-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -174,7 +183,7 @@ echo "🌐 Installation terminée."
 echo "Accès : https://${DOMAIN}"
 echo
 echo "🔑 Admin : https://${DOMAIN}/admin (mot de passe 'changeme')"
-echo "💾 Données stockées dans le PVC Puls8 'ms-volume-claim'."
+echo "💾 Données stockées dans le PVC Puls8 '${PVC_NAME}' (${STORAGE_SIZE}, classe ${STORAGE_CLASS})."
 echo
 echo "🔎 Vérifications :"
 echo " - kubectl get pods -n ${NAMESPACE}"
