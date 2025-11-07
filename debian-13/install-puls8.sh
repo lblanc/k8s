@@ -68,6 +68,15 @@ echo
 echo "✅ Plugin Puls8 installé avec succès."
 pause
 
+echo "🔹 Label worker nodes..."
+for node in ${workernodes}; do
+kubectl label node ${node} openebs.io/engine=mayastor
+done
+
+echo
+echo "✅ Label worker nodes avec succès."
+pause
+
 
 echo "🔹 Vérification des pods..."
 kubectl get pods -n "${NAMESPACE}" -o wide || true
