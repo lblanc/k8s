@@ -9,7 +9,7 @@ metadata:
   namespace: puls8
 spec:
   node: node2
-  disks: ["auring:///dev/vdb"]
+  disks: ["aio:///dev/disk/by-path/virtio-pci-0000:00:0b.0"]
 EOF
 
 cat <<EOF | kubectl create -f -
@@ -20,7 +20,7 @@ metadata:
   namespace: puls8
 spec:
   node: node3
-  disks: ["auring:///dev/vdb"]
+  disks: ["aio:///dev/disk/by-path/virtio-pci-0000:00:0b.0"]
 EOF
 
 cat <<EOF | kubectl create -f -
@@ -31,7 +31,7 @@ metadata:
   namespace: puls8
 spec:
   node: node4
-  disks: ["auring:///dev/vdb"]
+  disks: ["aio:///dev/disk/by-path/virtio-pci-0000:00:0b.0"]
 EOF
 
 
