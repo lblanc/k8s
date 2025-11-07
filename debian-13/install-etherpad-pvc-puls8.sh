@@ -66,7 +66,17 @@ kubectl apply -f etherpad-pvc.yaml
 echo "✅ PVC créé (${STORAGE_SIZE}, classe ${STORAGE_CLASS})."
 pause
 
-echo "🔹 Déploiement de Etherpad (base SQLite locale)..."
+echo "🔹 Création du ConfigMap 'custom-headers' pour NGINX Ingress..."
+kubectl create configmap custom-headers -n ingress-nginx \
+  --from-literal=X-Forwarded-Proto=https \
+  --from-literal=X-Forwarded-Port=443 \
+  --from-literal=X-Forwarded-For=\$proxy_add_x_forwarded_for \
+  --from-literal=X-Forwarded-Host=\$host \
+  --dry-run=client -o yaml | kubectl apply -f -
+echo "✅ ConfigMap appliqué."
+pause
+
+echo "🔹 Déploiement de Etherpad (base SQLite locale + proxy headers)..."
 cat <<EOF > etherpad-deploy.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -89,7 +99,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9001
-          # Exécution en root pour compatibilité Mayastor
+          # Exécution en root (compatibilité Mayastor)
           securityContext:
             runAsUser: 0
             runAsGroup: 0
@@ -104,6 +114,8 @@ spec:
               value: "sqlite"
             - name: DB_FILENAME
               value: "/opt/etherpad-lite/var/etherpad.sqlite"
+            - name: TRUST_PROXY
+              value: "true"
           volumeMounts:
             - name: etherpad-data
               mountPath: /opt/etherpad-lite/var
@@ -140,10 +152,10 @@ spec:
 EOF
 
 kubectl apply -f etherpad-deploy.yaml
-echo "✅ Etherpad déployé avec SQLite."
+echo "✅ Etherpad déployé (SQLite)."
 pause
 
-echo "🔹 Création de l'Ingress Etherpad (TLS + rewrite)..."
+echo "🔹 Création de l'Ingress Etherpad (TLS sans rewrite)..."
 cat <<EOF > etherpad-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -152,9 +164,8 @@ metadata:
   namespace: ${NAMESPACE}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-set-headers: "ingress-nginx/custom-headers"
 spec:
   ingressClassName: nginx
   tls:
@@ -165,8 +176,8 @@ spec:
     - host: ${DOMAIN}
       http:
         paths:
-          - path: /(.*)
-            pathType: ImplementationSpecific
+          - path: /
+            pathType: Prefix
             backend:
               service:
                 name: etherpad
@@ -175,7 +186,7 @@ spec:
 EOF
 
 kubectl apply -f etherpad-ingress.yaml
-echo "✅ Ingress appliqué."
+echo "✅ Ingress appliqué (sans rewrite)."
 pause
 
 echo "🌐 Installation terminée."
