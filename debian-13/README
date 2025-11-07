@@ -28,6 +28,21 @@ chmod +x install-puls8.sh
 
 ******************************************************************************************************************************
 
+** Install etherpad **
+
+wget https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/install-etherpad-pvc-puls8.sh
+chmod +x install-etherpad-pvc-puls8.sh
+
+## Change varialbles before run :
+## EMAIL="email@luc-blanc.com"
+## DOMAIN="headlamp.k8s-lab0.demo-lab.site"
+## and PVC if needed
+
+./install-etherpad-pvc-puls8.sh
+
+
+******************************************************************************************************************************
+
 ** Install Draw.io **
 
 wget https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/install-drawio.sh
