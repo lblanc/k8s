@@ -66,7 +66,7 @@ kubectl apply -f etherpad-pvc.yaml
 echo "✅ PVC créé (${STORAGE_SIZE}, classe ${STORAGE_CLASS})."
 pause
 
-echo "🔹 Déploiement de Etherpad (avec correctif de permissions)..."
+echo "🔹 Déploiement de Etherpad (base SQLite locale)..."
 cat <<EOF > etherpad-deploy.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -83,31 +83,27 @@ spec:
       labels:
         app: etherpad
     spec:
-      initContainers:
-        - name: fix-permissions
-          image: busybox
-          command: ["sh", "-c", "chmod -R 777 /opt/etherpad-lite/var || true"]
-          volumeMounts:
-            - name: etherpad-data
-              mountPath: /opt/etherpad-lite/var
       containers:
         - name: etherpad
           image: etherpad/etherpad:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 9001
+          # Exécution en root pour compatibilité Mayastor
           securityContext:
             runAsUser: 0
             runAsGroup: 0
           env:
             - name: TITLE
-              value: "Etherpad Demo"
+              value: "Etherpad Demo (SQLite)"
             - name: DEFAULT_PAD_TEXT
-              value: "Bienvenue sur ton Etherpad privé 🚀"
+              value: "Bienvenue sur ton Etherpad SQLite 🚀"
             - name: ADMIN_PASSWORD
               value: "changeme"
             - name: DB_TYPE
-              value: "dirty"
+              value: "sqlite"
+            - name: DB_FILENAME
+              value: "/opt/etherpad-lite/var/etherpad.sqlite"
           volumeMounts:
             - name: etherpad-data
               mountPath: /opt/etherpad-lite/var
@@ -144,7 +140,7 @@ spec:
 EOF
 
 kubectl apply -f etherpad-deploy.yaml
-echo "✅ Etherpad déployé."
+echo "✅ Etherpad déployé avec SQLite."
 pause
 
 echo "🔹 Création de l'Ingress Etherpad (TLS + rewrite)..."
@@ -186,7 +182,7 @@ echo "🌐 Installation terminée."
 echo "Accès : https://${DOMAIN}"
 echo
 echo "🔑 Admin : https://${DOMAIN}/admin (mot de passe 'changeme')"
-echo "💾 Données stockées dans le PVC Puls8 '${PVC_NAME}' (${STORAGE_SIZE}, classe ${STORAGE_CLASS})."
+echo "💾 Données SQLite stockées dans le PVC Puls8 '${PVC_NAME}' (${STORAGE_SIZE}, classe ${STORAGE_CLASS})."
 echo
 echo "🔎 Vérifications :"
 echo " - kubectl get pods -n ${NAMESPACE}"
