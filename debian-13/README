@@ -47,15 +47,13 @@ chmod +x install-etherpad-pvc-puls8.sh
 
 ** Install Grafana Puls8 Ingress **
 
-wget https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/install-grafana-puls8.sh
-chmod +x install-etherpad-pvc-puls8.sh
+wget https://raw.githubusercontent.com/lblanc/k8s/main/debian-13/install-grafana-puls8-ingress.sh
+chmod +x install-grafana-puls8-ingress.sh
 
 ## Change varialbles before run :
-## EMAIL="email@luc-blanc.com"
-## DOMAIN="headlamp.k8s-lab0.demo-lab.site"
-## and PVC if needed
+## DOMAIN="grafana-puls8.k8s-lab1.demo-lab.site"
 
-./install-etherpad-pvc-puls8.sh
+./install-grafana-puls8-ingress.sh
 
 
 ******************************************************************************************************************************
