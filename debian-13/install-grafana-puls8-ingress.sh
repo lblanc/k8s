@@ -37,7 +37,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: grafana
+                name: puls8-grafana
                 port:
                   number: 80
 EOF
